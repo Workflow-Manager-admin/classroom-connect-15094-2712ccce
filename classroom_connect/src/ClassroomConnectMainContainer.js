@@ -12,6 +12,7 @@
  *
  * Don't forget: after updating the .env file, restart your "npm start" process for changes to take effect.
  */
+
 import React, { useState } from "react";
 
 // Colors and theme for playful, inviting, light-student style
@@ -385,15 +386,16 @@ const ClassroomJoinCreateForm = ({
       process.env &&
       process.env.REACT_APP_BACKEND_URL) ||
     (typeof window !== "undefined" &&
-      window.REACT_APP_BACKEND_URL) || // For some browser env usage
+      window.REACT_APP_BACKEND_URL) ||
     (typeof window !== "undefined" &&
       window.env &&
-      window.env.REACT_APP_BACKEND_URL) || // For some injected script configs
+      window.env.REACT_APP_BACKEND_URL) ||
     "http://localhost:4555";
   // Use actual app origin for join link
   const APP_ORIGIN =
     typeof window !== "undefined" &&
-    window.location &&    window.location.origin
+    window.location &&
+    window.location.origin
       ? window.location.origin
       : "https://yourapp.com";
 

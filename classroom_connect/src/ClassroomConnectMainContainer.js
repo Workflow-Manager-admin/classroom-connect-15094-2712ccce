@@ -273,7 +273,7 @@ const generateClassroomCode = () => {
   return result;
 };
 
-const ClassroomJoinCreateForm = () => {
+const ClassroomJoinCreateForm = ({ myClassrooms, setMyClassrooms, onJoinedClassroom, setMainView }) => {
   const [mode, setMode] = useState("join"); // or "create"
   const [joinCodeInput, setJoinCodeInput] = useState("");
   const [membersInput, setMembersInput] = useState("");
@@ -334,10 +334,14 @@ const ClassroomJoinCreateForm = () => {
         setJoinError(data?.error || "Failed to join classroom.");
       } else {
         const body = await res.json();
-        // Success! Optionally, record membership in localStorage/session here.
         setJoinError("");
         setJoinSuccessInfo(body.classroom);
-        // alert(`Joined classroom "${body.classroom.code}"!`);
+        // Add to storage and state, then redirect to dashboard or show success.
+        addClassroomToStorage(body.classroom, setMyClassrooms);
+        // Optionally notify parent
+        if (typeof onJoinedClassroom === "function") onJoinedClassroom(body.classroom);
+        // Briefly show success then go to dashboard for instant feedback.
+        setTimeout(() => typeof setMainView === "function" && setMainView("dashboard"), 1050);
       }
     } catch (err) {
       setJoinError("Network error – could not reach backend.");

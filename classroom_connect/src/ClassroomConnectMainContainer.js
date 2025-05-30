@@ -400,127 +400,218 @@ const ClassroomView = () => {
   );
 };
 
+/**
+ * Main playful app UI chrome - prominent header, logo, background, nav.
+ */
 // PUBLIC_INTERFACE
 export const ClassroomConnectMainContainer = () => {
   const [mainView, setMainView] = useState("dashboard");
-
+  // Gentle background: subtle gradient or playful pattern, and rounded nav bar
   return (
-    <div style={{
-      minHeight: "100vh",
-      background: colorPalette.bg,
-      display: "flex",
-      flexDirection: "column"
-    }}>
-      {/* Navbar */}
-      <nav style={{
-        width: "100%",
-        background: colorPalette.primary,
-        color: "#fff",
-        boxSizing: "border-box",
-        padding: "14px 0",
+    <div
+      style={{
+        minHeight: "100vh",
+        background: `linear-gradient(-4deg, #f9fafb 60%, #fbd46d17 100%), ${colorPalette.bg}`,
+        fontFamily: fontStack,
         display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        boxShadow: "0 2px 7px #e4e9f4"
-      }}>
-        <div style={{
-          width: "95%",
-          maxWidth: 1050,
+        flexDirection: "column",
+      }}
+    >
+      {/* Playful Navbar */}
+      <nav
+        style={{
+          width: "100%",
+          background: colorPalette.primary,
+          color: "#fff",
+          boxSizing: "border-box",
+          padding: "11px 0 11px 0",
           display: "flex",
           alignItems: "center",
-          justifyContent: "space-between"
-        }}>
-          <div style={{
-            fontSize: "1.7rem",
-            fontWeight: 700,
-            letterSpacing: 1,
+          justifyContent: "center",
+          boxShadow: "0 3px 16px #dadee6, 0 1px 8px #ffd76e1a",
+          borderBottomLeftRadius: 32,
+          borderBottomRightRadius: 32,
+          minHeight: 62,
+          position: "relative"
+        }}
+      >
+        <div
+          style={{
+            width: "97%",
+            maxWidth: 1100,
             display: "flex",
             alignItems: "center",
-            gap: 10,
-            paddingLeft: 7
-          }}>
-            {/* Notebook SVG icon for playful logo */}
-            <span style={{
-              background: colorPalette.secondary,
-              color: colorPalette.primary,
-              borderRadius: "50%",
-              width: 38,
-              height: 38,
-              display: "inline-flex",
+            justifyContent: "space-between",
+            fontFamily: fontStack
+          }}
+        >
+          <div
+            style={{
+              fontSize: "1.80rem",
+              fontWeight: 900,
+              letterSpacing: 1,
+              display: "flex",
               alignItems: "center",
-              justifyContent: "center",
-              fontWeight: 800,
-              marginRight: 7,
-              fontFamily: "monospace",
-              fontSize: "1.3rem",
-              boxShadow: "0 1px 6px #fbf5d6",
-            }}>
+              gap: 12,
+              paddingLeft: 9,
+              color: "#fff",
+              fontFamily: fontStack,
+              textShadow: "0 1.5px 3px #a6e8ed70"
+            }}
+          >
+            {/* Friendly notebook logo (SVG) */}
+            <span
+              style={{
+                background: colorPalette.secondary,
+                color: colorPalette.primary,
+                borderRadius: "50%",
+                width: 44,
+                height: 44,
+                minWidth: 44,
+                minHeight: 44,
+                display: "inline-flex",
+                alignItems: "center",
+                justifyContent: "center",
+                marginRight: 7,
+                marginLeft: 0,
+                fontWeight: 900,
+                fontFamily: fontStack,
+                fontSize: "1.25rem",
+                boxShadow: "0 1.2px 8px #fbf5d6",
+                border: "2.5px solid #fffbe5"
+              }}
+            >
               <svg
-                width="28"
-                height="28"
+                width="32"
+                height="32"
                 viewBox="0 0 32 32"
                 style={{ display: "block" }}
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
                 aria-label="Notebook"
               >
-                <rect x="6" y="5" width="18" height="22" rx="5" fill="#fffbea" stroke="#4F8A8B" strokeWidth="2"/>
-                <rect x="8.5" y="7.5" width="13" height="2.5" rx="1.2" fill="#FBD46D"/>
-                <rect x="8.5" y="14.5" width="13" height="1.5" rx="0.75" fill="#FFD780"/>
-                <rect x="8.5" y="18.5" width="13" height="1.2" rx="0.6" fill="#FFD780"/>
-                <rect x="8.5" y="22.5" width="8.5" height="1.2" rx="0.6" fill="#FFD780"/>
-                <circle cx="8.8" cy="9.1" r="0.95" fill="#F67280"/>
-                <circle cx="8.8" cy="15.2" r="0.7" fill="#F67280"/>
-                <circle cx="8.8" cy="19.2" r="0.7" fill="#F67280"/>
-                <circle cx="8.8" cy="23.2" r="0.7" fill="#F67280"/>
+                <rect x="6" y="5" width="18" height="22" rx="5" fill="#fffbea" stroke="#4F8A8B" strokeWidth="2" />
+                <rect x="8.5" y="7.5" width="13" height="2.5" rx="1.2" fill="#FBD46D" />
+                <rect x="8.5" y="14.5" width="13" height="1.5" rx="0.75" fill="#FFD780" />
+                <rect x="8.5" y="18.5" width="13" height="1.2" rx="0.6" fill="#FFD780" />
+                <rect x="8.5" y="22.5" width="8.5" height="1.2" rx="0.6" fill="#FFD780" />
+                <circle cx="8.8" cy="9.1" r="0.95" fill="#F67280" />
+                <circle cx="8.8" cy="15.2" r="0.7" fill="#F67280" />
+                <circle cx="8.8" cy="19.2" r="0.7" fill="#F67280" />
+                <circle cx="8.8" cy="23.2" r="0.7" fill="#F67280" />
               </svg>
             </span>
-            Classroom Connect
+            <span style={{ color: "#fff", fontWeight: 900, fontFamily: fontStack }}>Classroom Connect</span>
           </div>
-          <div style={{ display: "flex", gap: 10 }}>
+          <div style={{ display: "flex", gap: 12, fontFamily: fontStack }}>
             <button
               onClick={() => setMainView("dashboard")}
               style={{
-                background: mainView === "dashboard" ? colorPalette.secondary : "transparent",
+                background: mainView === "dashboard" ? colorPalette.secondary : "rgba(255,255,255,0.07)",
                 color: mainView === "dashboard" ? colorPalette.primary : "#fff",
-                fontWeight: 700,
-                borderRadius: 12,
+                fontWeight: 800,
+                borderRadius: 18,
                 border: "none",
-                padding: "8px 16px",
-                fontSize: 15,
+                outline: "none",
+                padding: "9px 18px",
+                fontSize: 15.5,
+                fontFamily: fontStack,
                 cursor: "pointer",
-                transition: "all 0.18s"
+                marginLeft: 2,
+                marginRight: 2,
+                boxShadow: mainView === "dashboard"
+                  ? "0 2px 8px #f8e7b4"
+                  : "0 0.5px 2px #97e5e341",
+                transition: "all 0.14s"
               }}
+              onMouseOver={e => {
+                if (mainView !== "dashboard") {
+                  e.currentTarget.style.background = "#ffe37a";
+                  e.currentTarget.style.color = colorPalette.primary;
+                }
+              }}
+              onMouseOut={e => {
+                if (mainView !== "dashboard") {
+                  e.currentTarget.style.background = "rgba(255,255,255,0.07)";
+                  e.currentTarget.style.color = "#fff";
+                }
+              }}
+              tabIndex={0}
+              aria-label="Dashboard"
             >
               Dashboard
             </button>
             <button
               onClick={() => setMainView("joinCreate")}
               style={{
-                background: mainView === "joinCreate" ? colorPalette.secondary : "transparent",
+                background: mainView === "joinCreate" ? colorPalette.secondary : "rgba(255,255,255,0.07)",
                 color: mainView === "joinCreate" ? colorPalette.primary : "#fff",
-                fontWeight: 700,
-                borderRadius: 12,
+                fontWeight: 800,
+                borderRadius: 18,
                 border: "none",
-                padding: "8px 16px",
-                fontSize: 15,
-                cursor: "pointer"
+                outline: "none",
+                padding: "9px 18px",
+                fontSize: 15.5,
+                fontFamily: fontStack,
+                cursor: "pointer",
+                marginLeft: 2,
+                marginRight: 2,
+                boxShadow: mainView === "joinCreate"
+                  ? "0 2px 8px #f8e7b4"
+                  : "0 0.5px 2px #97e5e341",
+                transition: "all 0.14s"
               }}
+              onMouseOver={e => {
+                if (mainView !== "joinCreate") {
+                  e.currentTarget.style.background = "#ffe37a";
+                  e.currentTarget.style.color = colorPalette.primary;
+                }
+              }}
+              onMouseOut={e => {
+                if (mainView !== "joinCreate") {
+                  e.currentTarget.style.background = "rgba(255,255,255,0.07)";
+                  e.currentTarget.style.color = "#fff";
+                }
+              }}
+              tabIndex={0}
+              aria-label="Join/Create"
             >
               Join/Create
             </button>
             <button
               onClick={() => setMainView("classroom")}
               style={{
-                background: mainView === "classroom" ? colorPalette.secondary : "transparent",
+                background: mainView === "classroom" ? colorPalette.secondary : "rgba(255,255,255,0.07)",
                 color: mainView === "classroom" ? colorPalette.primary : "#fff",
-                fontWeight: 700,
-                borderRadius: 12,
+                fontWeight: 800,
+                borderRadius: 18,
                 border: "none",
-                padding: "8px 16px",
-                fontSize: 15,
-                cursor: "pointer"
+                outline: "none",
+                padding: "9px 18px",
+                fontSize: 15.5,
+                fontFamily: fontStack,
+                cursor: "pointer",
+                marginLeft: 2,
+                marginRight: 2,
+                boxShadow: mainView === "classroom"
+                  ? "0 2px 8px #f8e7b4"
+                  : "0 0.5px 2px #97e5e341",
+                transition: "all 0.14s"
               }}
+              onMouseOver={e => {
+                if (mainView !== "classroom") {
+                  e.currentTarget.style.background = "#ffe37a";
+                  e.currentTarget.style.color = colorPalette.primary;
+                }
+              }}
+              onMouseOut={e => {
+                if (mainView !== "classroom") {
+                  e.currentTarget.style.background = "rgba(255,255,255,0.07)";
+                  e.currentTarget.style.color = "#fff";
+                }
+              }}
+              tabIndex={0}
+              aria-label="Classroom"
             >
               Classroom
             </button>
@@ -528,21 +619,33 @@ export const ClassroomConnectMainContainer = () => {
         </div>
       </nav>
       {/* Main Content Switcher */}
-      <main style={{
-        flex: 1,
-        padding: "38px 0 0 0",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center"
-      }}>
+      <main
+        style={{
+          flex: 1,
+          padding: "42px 0 0 0",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          fontFamily: fontStack
+        }}
+      >
         {mainView === "dashboard" && <Dashboard />}
         {mainView === "joinCreate" && <ClassroomJoinCreateForm />}
         {mainView === "classroom" && <ClassroomView />}
       </main>
-      <footer style={{ textAlign: "center", color: "#bbb", fontSize: 14, margin: "20px 0 8px 0" }}>
-        © {new Date().getFullYear()} Classroom Connect | Playful Collab Platform
+      <footer
+        style={{
+          textAlign: "center",
+          color: "#888",
+          fontSize: 15.5,
+          margin: "24px 0 15px 0",
+          letterSpacing: 0.03,
+          fontWeight: 500,
+          fontFamily: fontStack
+        }}
+      >
+        © {new Date().getFullYear()} Classroom Connect · For playful collaboration!
       </footer>
     </div>
   );
 };
-// Optionally for legacy compat: export default ClassroomConnectMainContainer;

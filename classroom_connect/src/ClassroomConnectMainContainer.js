@@ -943,12 +943,21 @@ const ClassroomView = () => {
 /**
  * Main playful app UI chrome - prominent header, logo, background, nav.
  */
-// PUBLIC_INTERFACE
+/**
+ * PUBLIC_INTERFACE
+ * Main Container controls classrooms list and passes as props.
+ */
 export const ClassroomConnectMainContainer = () => {
   const [mainView, setMainView] = useState("dashboard");
+  const [myClassrooms, setMyClassrooms] = useState(getAllMyClassroomsFromStorage());
 
-  // Handler so dashboard can navigate to join/create when "add/join" is clicked
+  // Navigate to join/create when dashboard calls
   const goToJoinCreate = () => setMainView("joinCreate");
+
+  // Handle new class joined, useful for future features (notified on successful join)
+  const handleJoinedClassroom = (classroom) => {
+    // State will be updated by storage helper and setMyClassrooms, but this can be expanded if needed.
+  };
 
   return (
     <div

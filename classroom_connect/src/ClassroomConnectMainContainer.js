@@ -560,7 +560,7 @@ const ClassroomJoinCreateForm = ({
 
   // "Create" success confirmation UI
   if (created && mode === "create") {
-    // Show confirmation: only classroom code and success message, NO share link
+    // Show confirmation—classroom name is included and prominent
     return (
       <section
         style={{
@@ -590,10 +590,21 @@ const ClassroomJoinCreateForm = ({
         </h2>
         <div
           style={{
+            fontWeight: 900,
+            fontSize: 20.5,
+            color: colorPalette.primary,
+            margin: "2px 0 9px 0",
+            textAlign: "center"
+          }}
+        >
+          {newClassName}
+        </div>
+        <div
+          style={{
             fontWeight: 700,
             fontSize: 17.5,
             color: colorPalette.accent,
-            margin: "8px 0 12px 0"
+            margin: "2px 0 12px 0"
           }}
         >
           {newClassroomMembers} member
@@ -684,6 +695,8 @@ const ClassroomJoinCreateForm = ({
             setCreated(false);
             setNewClassroomCode("");
             setNewClassroomMembers(null);
+            setNewClassName("");
+            setClassNameInput("");
             setMembersInput("");
           }}
         >

@@ -1006,43 +1006,7 @@ export const ClassroomConnectMainContainer = () => {
             >
               Join/Create
             </button>
-            <button
-              onClick={() => setMainView("classroom")}
-              style={{
-                background: mainView === "classroom" ? colorPalette.secondary : "rgba(255,255,255,0.07)",
-                color: mainView === "classroom" ? colorPalette.primary : "#fff",
-                fontWeight: 800,
-                borderRadius: 18,
-                border: "none",
-                outline: "none",
-                padding: "9px 18px",
-                fontSize: 15.5,
-                fontFamily: fontStack,
-                cursor: "pointer",
-                marginLeft: 2,
-                marginRight: 2,
-                boxShadow: mainView === "classroom"
-                  ? "0 2px 8px #f8e7b4"
-                  : "0 0.5px 2px #97e5e341",
-                transition: "all 0.14s"
-              }}
-              onMouseOver={e => {
-                if (mainView !== "classroom") {
-                  e.currentTarget.style.background = "#ffe37a";
-                  e.currentTarget.style.color = colorPalette.primary;
-                }
-              }}
-              onMouseOut={e => {
-                if (mainView !== "classroom") {
-                  e.currentTarget.style.background = "rgba(255,255,255,0.07)";
-                  e.currentTarget.style.color = "#fff";
-                }
-              }}
-              tabIndex={0}
-              aria-label="Classroom"
-            >
-              Classroom
-            </button>
+            {/* Removed the Classroom navigation button from navbar as requested */}
           </div>
         </div>
       </nav>

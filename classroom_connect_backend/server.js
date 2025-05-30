@@ -6,133 +6,141 @@ const cors = require('cors');
 const app = express();
 const PORT = process.env.PORT || 4555;
 
-/**
- * ===================================================================================
- * In-memory storage for classroom records.
- * Keyed by code (6 uppercase letters/digits): {
- *    code: string,
- *    members: number,
- *    createdAt: number (timestamp)
- * }
- * ===================================================================================
- */
+// ===================================================================================
+// In-memory storage for classroom data
+// Structure: { [classroomCode: string]: { code, members, createdAt } }
+// ===================================================================================
 const classrooms = {};
 
-// Helper: Normalize classroom code to uppercase
+// Helper: Normalize classroom code to uppercase (A-Z0-9, len=6)
 function normalizeCode(code) {
   return typeof code === 'string' ? code.toUpperCase() : '';
 }
 
-/**
- * CORS Configuration:
- * By default, app.use(cors()) enables requests from all origins. If you deploy the frontend separately (not same host/port as backend),
- * you may want to restrict the allowed origins, or pass credentials in the future. To lock down CORS, configure as:
- *    app.use(cors({
- *       origin: process.env.ALLOWED_ORIGIN || 'http://localhost:3000', // or your frontend URL in prod
- *       credentials: true // if supporting cookies/auth in future
- *    }));
- * See: https://expressjs.com/en/resources/middleware/cors.html
- */
+// Helper: Log errors with stack if possible (to stderr)
+function logError(err, req = null) {
+  if (process.env.NODE_ENV !== 'test') {
+    // Log error + endpoint context
+    // eslint-disable-next-line no-console
+    console.error(
+      `[${new Date().toISOString()}] ${req ? req.method + ' ' + req.originalUrl + ' - ' : ''}Error:`,
+      err && err.stack ? err.stack : err
+    );
+  }
+}
+
+// CORS Configuration: In dev, allow all origins; lock down as needed in production
 app.use(cors());
+// Parse JSON body, catch JSON parsing errors
 app.use(express.json());
 
-// ===========================================================================
-// API ENDPOINTS for CLASSROOM CONNECT BACKEND
-// ===========================================================================
+// Catch JSON syntax errors (malformed requests)
+app.use((err, req, res, next) => {
+  if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
+    logError(err, req);
+    return res.status(400).json({ error: 'Malformed JSON payload.' });
+  }
+  next(err);
+});
 
+// PUBLIC_INTERFACE
 /**
- * PUBLIC_INTERFACE
- *
- * Create a classroom with a 6-character code and a members limit.
- * - POST /classrooms
- * - Body: { code: string, members: number }
- *   - code: 6 uppercase letters or digits, unique
- *   - members: integer 1–200
- * - Response:
- *   - 201: { success: true, classroom: { code, members, createdAt } }
- *   - 400: invalid input
- *   - 409: code already exists
+ * POST /classrooms
+ * Create a classroom with a code and number of members.
+ * Expects: { code: string, members: number }
+ * Returns: { success: boolean, classroom: { code, members, createdAt } } or error
  */
 app.post('/classrooms', (req, res) => {
-  let { code, members } = req.body;
-  code = normalizeCode(code);
+  try {
+    let { code, members } = req.body;
+    code = normalizeCode(code);
 
-  // Validate code
-  if (
-    typeof code !== 'string' ||
-    code.length !== 6 ||
-    !/^[A-Z0-9]{6}$/.test(code)
-  ) {
-    return res.status(400).json({ error: 'Invalid classroom code. Must be 6 uppercase letters/digits.' });
+    // Validate classroom code
+    if (
+      typeof code !== 'string' ||
+      code.length !== 6 ||
+      !/^[A-Z0-9]{6}$/.test(code)
+    ) {
+      return res.status(400).json({ error: 'Invalid classroom code. Must be 6 uppercase letters/digits.' });
+    }
+
+    // Validate members
+    if (
+      typeof members !== 'number' ||
+      !Number.isInteger(members) ||
+      members < 1 ||
+      members > 200
+    ) {
+      return res.status(400).json({ error: 'Invalid members count (integer between 1-200).' });
+    }
+
+    // Check for duplicate code
+    if (classrooms[code]) {
+      return res.status(409).json({ error: 'Classroom code already exists.' });
+    }
+
+    // Create classroom record
+    classrooms[code] = {
+      code,
+      members,
+      createdAt: Date.now()
+    };
+    res.status(201).json({ success: true, classroom: classrooms[code] });
+  } catch (err) {
+    logError(err, req);
+    res.status(500).json({ error: 'Internal server error while creating classroom.' });
   }
-
-  // Validate members
-  if (
-    typeof members !== 'number' ||
-    !Number.isInteger(members) ||
-    members < 1 ||
-    members > 200
-  ) {
-    return res.status(400).json({ error: 'Invalid members count (1-200, integer, required).' });
-  }
-
-  // Classroom code uniqueness
-  if (classrooms[code]) {
-    return res.status(409).json({ error: 'Classroom code already exists.' });
-  }
-
-  // Create classroom in store
-  classrooms[code] = {
-    code,
-    members,
-    createdAt: Date.now()
-  };
-  res.status(201).json({ success: true, classroom: classrooms[code] });
 });
 
+// PUBLIC_INTERFACE
 /**
- * PUBLIC_INTERFACE
- * 
- * Check existence/details of a classroom by code.
- * - GET /classrooms/:code
- * - Response:
- *    - 200: { classroom }
- *    - 404: if code not found
- *    - 400: if code format invalid
+ * GET /classrooms/:code
+ * Verify a classroom exists for a given code.
+ * Returns: { classroom } or 404 if not found
  */
 app.get('/classrooms/:code', (req, res) => {
-  let code = normalizeCode(req.params.code);
+  try {
+    let code = normalizeCode(req.params.code);
 
-  if (
-    typeof code !== 'string' ||
-    code.length !== 6 ||
-    !/^[A-Z0-9]{6}$/.test(code)
-  ) {
-    return res.status(400).json({ error: 'Invalid classroom code. Must be 6 uppercase letters/digits.' });
+    if (
+      typeof code !== 'string' ||
+      code.length !== 6 ||
+      !/^[A-Z0-9]{6}$/.test(code)
+    ) {
+      return res.status(400).json({ error: 'Invalid classroom code. Must be 6 uppercase letters/digits.' });
+    }
+    const classroom = classrooms[code];
+    if (!classroom) {
+      return res.status(404).json({ error: 'Classroom not found.' });
+    }
+    res.json({ classroom });
+  } catch (err) {
+    logError(err, req);
+    res.status(500).json({ error: 'Internal server error while verifying classroom.' });
   }
-  const classroom = classrooms[code];
-  if (!classroom) {
-    return res.status(404).json({ error: 'Classroom not found.' });
-  }
-  res.json({ classroom });
 });
 
+// PUBLIC_INTERFACE
 /**
- * PUBLIC_INTERFACE
- *
- * Health check endpoint for server status.
- * - GET /
- * - Returns: { status: "ok", msg: ... }
+ * GET /
+ * Health check endpoint
  */
 app.get('/', (req, res) => {
   res.json({ status: 'ok', msg: 'Classroom Connect backend running.' });
 });
 
-// Fallback for unsupported routes
+// Fallback for unsupported routes (404 for everything else)
 app.use((req, res) => {
   res.status(404).json({ error: 'Endpoint not found.' });
 });
 
+// Express global error handler (with stack logging)
+app.use((err, req, res, next) => {
+  logError(err, req);
+  res.status(500).json({ error: 'Unhandled server error.' });
+});
+
+// Start server
 app.listen(PORT, () => {
   // eslint-disable-next-line no-console
   console.log(`Classroom Connect backend listening on port ${PORT}`);

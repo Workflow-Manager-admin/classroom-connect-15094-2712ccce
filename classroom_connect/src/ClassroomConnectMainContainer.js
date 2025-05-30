@@ -504,6 +504,15 @@ const ClassroomJoinCreateForm = ({
     setJoinError("");
     setJoinSuccessInfo(null);
 
+    // New: Validate name input
+    const trimmedName = classNameInput.trim();
+    if (!trimmedName || trimmedName.length > 40) {
+      setSubmitting(false);
+      setClassNameTouched(true);
+      setCreateError("Classroom name is required (max 40 characters).");
+      return;
+    }
+
     const count = parseInt(membersInput, 10);
     if (isNaN(count) || count < 1 || count > 200) {
       setSubmitting(false);
@@ -534,15 +543,17 @@ const ClassroomJoinCreateForm = ({
 
     classroomsRef.push({
       code,
+      name: trimmedName, // Store the classroom name
       maxMembers: count,
       currentMembers: 1 // Creator is first member
     });
 
     setNewClassroomCode(code);
+    setNewClassName(trimmedName);
     setNewClassroomMembers(count);
     setCreated(true);
 
-    addClassroomToStorage({ code, members: count }, setMyClassrooms);
+    addClassroomToStorage({ code, members: count, name: trimmedName }, setMyClassrooms);
 
     setSubmitting(false);
   };

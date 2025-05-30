@@ -256,12 +256,13 @@ export const ClassroomConnectMainContainer = () => {
             gap: 10,
             paddingLeft: 7
           }}>
+            {/* Notebook SVG icon for playful logo */}
             <span style={{
               background: colorPalette.secondary,
               color: colorPalette.primary,
               borderRadius: "50%",
-              width: 36,
-              height: 36,
+              width: 38,
+              height: 38,
               display: "inline-flex",
               alignItems: "center",
               justifyContent: "center",
@@ -269,7 +270,28 @@ export const ClassroomConnectMainContainer = () => {
               marginRight: 7,
               fontFamily: "monospace",
               fontSize: "1.3rem",
-            }}>✦</span>
+              boxShadow: "0 1px 6px #fbf5d6",
+            }}>
+              <svg
+                width="28"
+                height="28"
+                viewBox="0 0 32 32"
+                style={{ display: "block" }}
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                aria-label="Notebook"
+              >
+                <rect x="6" y="5" width="18" height="22" rx="5" fill="#fffbea" stroke="#4F8A8B" strokeWidth="2"/>
+                <rect x="8.5" y="7.5" width="13" height="2.5" rx="1.2" fill="#FBD46D"/>
+                <rect x="8.5" y="14.5" width="13" height="1.5" rx="0.75" fill="#FFD780"/>
+                <rect x="8.5" y="18.5" width="13" height="1.2" rx="0.6" fill="#FFD780"/>
+                <rect x="8.5" y="22.5" width="8.5" height="1.2" rx="0.6" fill="#FFD780"/>
+                <circle cx="8.8" cy="9.1" r="0.95" fill="#F67280"/>
+                <circle cx="8.8" cy="15.2" r="0.7" fill="#F67280"/>
+                <circle cx="8.8" cy="19.2" r="0.7" fill="#F67280"/>
+                <circle cx="8.8" cy="23.2" r="0.7" fill="#F67280"/>
+              </svg>
+            </span>
             Classroom Connect
           </div>
           <div style={{ display: "flex", gap: 10 }}>

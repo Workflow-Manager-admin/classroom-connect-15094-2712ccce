@@ -1,3 +1,17 @@
+/**
+ * IMPORTANT:
+ *
+ * The Classroom Connect frontend expects the backend API base URL to be set via the REACT_APP_BACKEND_URL environment variable.
+ * - To specify the backend, create a file named ".env" in the classroom_connect/ directory with:
+ *     REACT_APP_BACKEND_URL=http://localhost:4555
+ *   or your deployed backend endpoint.
+ * - If this variable is not set, the frontend defaults to http://localhost:4555.
+ *
+ * Example .env file (place in classroom_connect/):
+ *     REACT_APP_BACKEND_URL=http://localhost:4555
+ *
+ * Don't forget: after updating the .env file, restart your "npm start" process for changes to take effect.
+ */
 import React, { useState } from "react";
 
 // Colors and theme for playful, inviting, light-student style
@@ -363,13 +377,23 @@ const ClassroomJoinCreateForm = ({
   const [newClassroomCode, setNewClassroomCode] = useState("");
   const [newClassroomMembers, setNewClassroomMembers] = useState(null);
 
-  // Backend config (update port if needed)
-  const BACKEND_URL = "http://localhost:4555";
+  // Backend config: use environment variable if available, otherwise fallback to default
+  // Set REACT_APP_BACKEND_URL in your .env file (in classroom_connect/) to override the backend API base URL.
+  // e.g. REACT_APP_BACKEND_URL=https://your-production-backend.com
+  const BACKEND_URL =
+    (typeof process !== "undefined" &&
+      process.env &&
+      process.env.REACT_APP_BACKEND_URL) ||
+    (typeof window !== "undefined" &&
+      window.REACT_APP_BACKEND_URL) || // For some browser env usage
+    (typeof window !== "undefined" &&
+      window.env &&
+      window.env.REACT_APP_BACKEND_URL) || // For some injected script configs
+    "http://localhost:4555";
   // Use actual app origin for join link
   const APP_ORIGIN =
     typeof window !== "undefined" &&
-    window.location &&
-    window.location.origin
+    window.location &&    window.location.origin
       ? window.location.origin
       : "https://yourapp.com";
 

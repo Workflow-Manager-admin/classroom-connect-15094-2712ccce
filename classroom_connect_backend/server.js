@@ -23,6 +23,16 @@ function normalizeCode(code) {
   return typeof code === 'string' ? code.toUpperCase() : '';
 }
 
+/**
+ * CORS Configuration:
+ * By default, app.use(cors()) enables requests from all origins. If you deploy the frontend separately (not same host/port as backend),
+ * you may want to restrict the allowed origins, or pass credentials in the future. To lock down CORS, configure as:
+ *    app.use(cors({
+ *       origin: process.env.ALLOWED_ORIGIN || 'http://localhost:3000', // or your frontend URL in prod
+ *       credentials: true // if supporting cookies/auth in future
+ *    }));
+ * See: https://expressjs.com/en/resources/middleware/cors.html
+ */
 app.use(cors());
 app.use(express.json());
 

@@ -1331,123 +1331,208 @@ const ClassroomNotebookStub = () => (
   </div>
 );
 
-const ClassroomServicesStub = () => (
-  <div style={{
-      display: "flex",
-      flexWrap: "wrap",
-      gap: 24,
-      justifyContent: "center",
-      width: "99%",
-      margin: "0 auto"
-    }}>
-    {/* Group Projects Card */}
-    <div style={{
-      background: "#E1F9F2",
-      borderRadius: 18,
-      minWidth: 280,
-      minHeight: 175,
-      boxShadow: colorPalette.shadow,
-      padding: "34px 16px 24px 16px",
-      margin: "7px 0 7px 0",
-      fontFamily: fontStack,
-      color: "#348080",
-      fontWeight: 700,
-      textAlign: "center",
-      display: "flex",
-      flexDirection: "column",
-      justifyContent: "space-between",
-      alignItems: "center",
-      position: "relative"
-    }}>
-      <div style={{ fontSize: "2.0em", marginBottom: 7, lineHeight: 1 }}>🧑‍🤝‍🧑</div>
-      <div style={{ fontSize: 18.5, color: "#229684", fontWeight: 900, marginBottom: 11 }}>
-        Group Projects
-      </div>
-      <div style={{ fontSize: 14.5, color: "#358e80", marginBottom: 8 }}>
-        Form teams, assign tasks, and track progress. <br />
-        <span style={{ color: colorPalette.secondary, fontWeight: 600 }}>
-          (Feature coming soon)
-        </span>
-      </div>
-      <button
+/**
+ * ClassroomServicesTab: Replaces the stub for the Services tab with actual Leave Classroom capability.
+ * Props:
+ *    classroom: current classroom object (contains .code, .members, etc.)
+ *    onLeave: function to call when leaving classroom (synchronizes state/UI)
+ *    isOnlyMember: bool - whether the user is the last member
+ */
+const ClassroomServicesTab = ({ classroom, onLeave, isOnlyMember }) => {
+  return (
+    <div
+      style={{
+        display: "flex",
+        flexWrap: "wrap",
+        gap: 24,
+        justifyContent: "center",
+        width: "99%",
+        margin: "0 auto",
+        flexDirection: "column",
+        alignItems: "center"
+      }}
+    >
+      <div
         style={{
-          background: "#a2e6d7",
-          color: "#115950",
-          borderRadius: 38,
-          border: "none",
-          fontWeight: 700,
-          fontSize: 20,
-          padding: "7px 19px",
-          marginTop: 10,
-          boxShadow: "0 1.5px 7px #b0fff1",
-          cursor: "not-allowed",
-          display: "flex",
-          alignItems: "center"
+          maxWidth: 500,
+          width: "100%",
+          background: "#fcfdfc",
+          borderRadius: 17,
+          padding: "25px 26px 20px 26px",
+          margin: "20px auto 24px auto",
+          boxShadow: "0 2px 14px #d6f1df",
+          fontFamily: fontStack,
+          color: colorPalette.primary,
+          fontWeight: 850,
+          textAlign: "center",
+          fontSize: 19.5,
         }}
-        type="button"
-        disabled
-        aria-label="Add Group Project (stub)"
-        title="Add Group Project (coming soon)"
       >
-        <span style={{ fontSize: 22, marginRight: 8 }}>➕</span>
-        Add Project
-      </button>
-    </div>
-    {/* Audio/Video Calls Card */}
-    <div style={{
-      background: "#FFF1F8",
-      borderRadius: 18,
-      minWidth: 280,
-      minHeight: 175,
-      boxShadow: colorPalette.shadow,
-      padding: "34px 16px 24px 16px",
-      margin: "7px 0 7px 0",
-      fontFamily: fontStack,
-      color: "#cf4e8d",
-      fontWeight: 700,
-      textAlign: "center",
-      display: "flex",
-      flexDirection: "column",
-      justifyContent: "space-between",
-      alignItems: "center",
-      position: "relative"
-    }}>
-      <div style={{ fontSize: "2.0em", marginBottom: 7, lineHeight: 1 }}>🎤</div>
-      <div style={{ fontSize: 18.5, color: "#E53D74", fontWeight: 900, marginBottom: 11 }}>
-        Audio / Video Calls
-      </div>
-      <div style={{ fontSize: 14.5, color: "#B24E7B", marginBottom: 8 }}>
-        Talk live with classmates.<br />
-        <span style={{ color: colorPalette.secondary, fontWeight: 600 }}>
-          (Feature coming soon)
+        <span role="img" aria-label="services" style={{ fontSize: 32, marginBottom: 3 }}>
+          🛠️
         </span>
+        <div style={{ fontWeight: 700, margin: "10px 0", fontSize: 22 }}>
+          Services
+        </div>
+        <div style={{ color: "#666", fontWeight: 500, fontSize: 16, marginBottom: 18, marginTop: 3 }}>
+          Collaboration tools coming soon!
+          <br />
+        </div>
+        <button
+          style={{
+            background: colorPalette.accent,
+            color: "#fff",
+            borderRadius: 13,
+            border: "none",
+            fontWeight: 800,
+            fontFamily: fontStack,
+            fontSize: 19,
+            padding: "14px 33px",
+            marginTop: 4,
+            marginBottom: 6,
+            boxShadow: "0 1.9px 12px #fad2ddc0",
+            cursor: "pointer",
+            transition: "background 0.15s",
+            outline: "none"
+          }}
+          onClick={onLeave}
+          tabIndex={0}
+          onMouseOver={e => { e.currentTarget.style.background = "#fa4b6a"; }}
+          onMouseOut={e => { e.currentTarget.style.background = colorPalette.accent; }}
+        >
+          {isOnlyMember
+            ? <>🛑 Leave &amp; Delete Classroom</>
+            : <>🚪 Leave Classroom</>
+          }
+        </button>
+        <div style={{ color: colorPalette.accent, fontSize: 15, marginTop: 5 }}>
+          {isOnlyMember
+            ? <>As the last member, leaving will <b>delete</b> this classroom.</>
+            : <>You will leave this classroom but it will remain for other members.</>
+          }
+        </div>
       </div>
-      <button
+      {/* Show stubbed service cards below, for fun/filler */}
+      <div
         style={{
-          background: "#ffd1ea",
-          color: "#bc2071",
-          borderRadius: 38,
-          border: "none",
-          fontWeight: 700,
-          fontSize: 20,
-          padding: "7px 19px",
-          marginTop: 10,
-          boxShadow: "0 1.2px 7px #ffe3fb",
-          cursor: "not-allowed",
           display: "flex",
-          alignItems: "center"
+          flexWrap: "wrap",
+          gap: 24,
+          justifyContent: "center",
+          width: "99%",
+          margin: "0 auto"
         }}
-        type="button"
-        disabled
-        aria-label="Add Call (stub)"
-        title="Add Call (coming soon)"
       >
-        <span style={{ fontSize: 22, marginRight: 8 }}>➕</span>
-        Add Call
-      </button>
+        {/* Group Projects Card */}
+        <div style={{
+          background: "#E1F9F2",
+          borderRadius: 18,
+          minWidth: 280,
+          minHeight: 175,
+          boxShadow: colorPalette.shadow,
+          padding: "34px 16px 24px 16px",
+          margin: "7px 0 7px 0",
+          fontFamily: fontStack,
+          color: "#348080",
+          fontWeight: 700,
+          textAlign: "center",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between",
+          alignItems: "center",
+          position: "relative"
+        }}>
+          <div style={{ fontSize: "2.0em", marginBottom: 7, lineHeight: 1 }}>🧑‍🤝‍🧑</div>
+          <div style={{ fontSize: 18.5, color: "#229684", fontWeight: 900, marginBottom: 11 }}>
+            Group Projects
+          </div>
+          <div style={{ fontSize: 14.5, color: "#358e80", marginBottom: 8 }}>
+            Form teams, assign tasks, and track progress. <br />
+            <span style={{ color: colorPalette.secondary, fontWeight: 600 }}>
+              (Feature coming soon)
+            </span>
+          </div>
+          <button
+            style={{
+              background: "#a2e6d7",
+              color: "#115950",
+              borderRadius: 38,
+              border: "none",
+              fontWeight: 700,
+              fontSize: 20,
+              padding: "7px 19px",
+              marginTop: 10,
+              boxShadow: "0 1.5px 7px #b0fff1",
+              cursor: "not-allowed",
+              display: "flex",
+              alignItems: "center"
+            }}
+            type="button"
+            disabled
+            aria-label="Add Group Project (stub)"
+            title="Add Group Project (coming soon)"
+          >
+            <span style={{ fontSize: 22, marginRight: 8 }}>➕</span>
+            Add Project
+          </button>
+        </div>
+        {/* Audio/Video Calls Card */}
+        <div style={{
+          background: "#FFF1F8",
+          borderRadius: 18,
+          minWidth: 280,
+          minHeight: 175,
+          boxShadow: colorPalette.shadow,
+          padding: "34px 16px 24px 16px",
+          margin: "7px 0 7px 0",
+          fontFamily: fontStack,
+          color: "#cf4e8d",
+          fontWeight: 700,
+          textAlign: "center",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "space-between",
+          alignItems: "center",
+          position: "relative"
+        }}>
+          <div style={{ fontSize: "2.0em", marginBottom: 7, lineHeight: 1 }}>🎤</div>
+          <div style={{ fontSize: 18.5, color: "#E53D74", fontWeight: 900, marginBottom: 11 }}>
+            Audio / Video Calls
+          </div>
+          <div style={{ fontSize: 14.5, color: "#B24E7B", marginBottom: 8 }}>
+            Talk live with classmates.<br />
+            <span style={{ color: colorPalette.secondary, fontWeight: 600 }}>
+              (Feature coming soon)
+            </span>
+          </div>
+          <button
+            style={{
+              background: "#ffd1ea",
+              color: "#bc2071",
+              borderRadius: 38,
+              border: "none",
+              fontWeight: 700,
+              fontSize: 20,
+              padding: "7px 19px",
+              marginTop: 10,
+              boxShadow: "0 1.2px 7px #ffe3fb",
+              cursor: "not-allowed",
+              display: "flex",
+              alignItems: "center"
+            }}
+            type="button"
+            disabled
+            aria-label="Add Call (stub)"
+            title="Add Call (coming soon)"
+          >
+            <span style={{ fontSize: 22, marginRight: 8 }}>➕</span>
+            Add Call
+          </button>
+        </div>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 /**
  * ClassroomView: tabbed navigation for primary in-classroom features

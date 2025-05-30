@@ -922,7 +922,10 @@ const ClassroomView = () => {
 // PUBLIC_INTERFACE
 export const ClassroomConnectMainContainer = () => {
   const [mainView, setMainView] = useState("dashboard");
-  // Gentle background: subtle gradient or playful pattern, and rounded nav bar
+
+  // Handler so dashboard can navigate to join/create when "add/join" is clicked
+  const goToJoinCreate = () => setMainView("joinCreate");
+
   return (
     <div
       style={{
@@ -1109,7 +1112,7 @@ export const ClassroomConnectMainContainer = () => {
           fontFamily: fontStack
         }}
       >
-        {mainView === "dashboard" && <Dashboard />}
+        {mainView === "dashboard" && <Dashboard onGoToJoinCreate={goToJoinCreate} />}
         {mainView === "joinCreate" && <ClassroomJoinCreateForm />}
         {mainView === "classroom" && <ClassroomView />}
       </main>

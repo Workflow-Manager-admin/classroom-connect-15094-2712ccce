@@ -1537,7 +1537,11 @@ const ClassroomServicesTab = ({ classroom, onLeave, isOnlyMember }) => {
 /**
  * ClassroomView: tabbed navigation for primary in-classroom features
  */
-const ClassroomView = () => {
+const ClassroomView = ({
+  classroom,
+  onLeaveClassroom,
+  isOnlyMember
+}) => {
   // All tab keys are lower-case for state
   const [tab, setTab] = useState("chat");
 
@@ -1560,7 +1564,13 @@ const ClassroomView = () => {
       content = <ClassroomNotebookStub />;
       break;
     case "services":
-      content = <ClassroomServicesStub />;
+      content = (
+        <ClassroomServicesTab
+          classroom={classroom}
+          onLeave={onLeaveClassroom}
+          isOnlyMember={isOnlyMember}
+        />
+      );
       break;
     default:
       content = null;

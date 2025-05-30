@@ -654,6 +654,16 @@ const ClassroomJoinCreateForm = () => {
           >
             {submitting ? "Creating..." : "Create Classroom"}
           </button>
+          {createError && (
+            <div style={{
+              color: colorPalette.accent,
+              fontWeight: 700,
+              padding: "10px 0 0 0",
+              minHeight: 22
+            }}>
+              {createError}
+            </div>
+          )}
         </form>
       )}
     </section>

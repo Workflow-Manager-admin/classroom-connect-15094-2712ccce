@@ -151,96 +151,409 @@ const Dashboard = () => (
   </section>
 );
 
-// Classroom joining/creation form, cheerful card-like design
-const ClassroomJoinCreateForm = () => (
-  <section
-    style={{
-      margin: "3.3rem auto",
-      background: colorPalette.card,
-      padding: 36,
-      borderRadius: 22,
-      maxWidth: 350,
-      minWidth: 260,
-      fontFamily: fontStack,
-      boxShadow: colorPalette.shadow,
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center"
-    }}
-  >
-    <h2 style={{
-      marginBottom: 20,
-      color: colorPalette.primary,
-      fontWeight: 800,
-      fontFamily: fontStack,
-      fontSize: "1.53rem",
-      letterSpacing: 0.5
-    }}>
-      Join or Create Classroom
-    </h2>
-    <input
-      type="text"
-      placeholder="🔑 Enter classroom code"
+/**
+ * Classroom joining/creation form, cheerful card-like design,
+ * now with Number of Members input (required for 'Create'),
+ * classroom code auto-generation, and shareable link display.
+ */
+const generateClassroomCode = () => {
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  let result = '';
+  for (let i = 0; i < 6; ++i) {
+    result += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return result;
+};
+
+const ClassroomJoinCreateForm = () => {
+  const [mode, setMode] = useState("join"); // or "create"
+  const [joinCodeInput, setJoinCodeInput] = useState("");
+  const [membersInput, setMembersInput] = useState("");
+  const [membersTouched, setMembersTouched] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [created, setCreated] = useState(false);
+  const [newClassroomCode, setNewClassroomCode] = useState("");
+  const [newClassroomMembers, setNewClassroomMembers] = useState(null);
+
+  // Demo: host for the join link (adjust as needed)
+  const APP_ORIGIN = "https://yourapp.com"; // Could also use window.location.origin
+
+  // Reset when mode changes
+  React.useEffect(() => {
+    setJoinCodeInput("");
+    setMembersInput("");
+    setCreated(false);
+    setNewClassroomCode("");
+    setNewClassroomMembers(null);
+    setMembersTouched(false);
+  }, [mode]);
+
+  const handleJoinSubmit = (e) => {
+    e.preventDefault();
+    // For demo: stub join logic
+    // In real app, validate/join call here
+    alert(`Joining classroom: ${joinCodeInput.trim().toUpperCase()}`);
+    setJoinCodeInput("");
+  };
+
+  const handleCreateSubmit = (e) => {
+    e.preventDefault();
+    setSubmitting(true);
+    // Validate member count
+    const count = parseInt(membersInput, 10);
+    if (isNaN(count) || count < 1) {
+      setSubmitting(false);
+      setMembersTouched(true);
+      return;
+    }
+    // Generate code and set created state
+    const code = generateClassroomCode();
+    setNewClassroomCode(code);
+    setNewClassroomMembers(count);
+    setTimeout(() => {
+      setCreated(true);
+      setSubmitting(false);
+    }, 300); // simulate delay
+  };
+
+  if (created && mode === "create") {
+    // Show confirmation and share link
+    const joinUrl = `${APP_ORIGIN}/join/${newClassroomCode}`;
+    return (
+      <section
+        style={{
+          margin: "3.3rem auto",
+          background: colorPalette.card,
+          padding: 36,
+          borderRadius: 22,
+          maxWidth: 440,
+          minWidth: 260,
+          fontFamily: fontStack,
+          boxShadow: colorPalette.shadow,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center"
+        }}
+      >
+        <h2 style={{
+          marginBottom: 16,
+          color: colorPalette.primary,
+          fontWeight: 800,
+          fontFamily: fontStack,
+          fontSize: "1.45rem",
+        }}>
+          🎉 Classroom Created!
+        </h2>
+        <div style={{ fontWeight: 700, fontSize: 17.5, color: colorPalette.accent, margin: "8px 0 12px 0" }}>
+          {newClassroomMembers} member{newClassroomMembers > 1 ? "s" : ""} (limit)
+        </div>
+        <div
+          style={{
+            margin: "0 0 15px 0",
+            padding: "15px 15px 10px 15px",
+            background: "#f7efeb",
+            borderRadius: 13,
+            minWidth: 222,
+            maxWidth: 350,
+            textAlign: "center",
+            fontFamily: fontStack,
+            boxShadow: "0 1.5px 8px #f0f5e6a8"
+          }}
+        >
+          <div style={{ margin: "0 0 7px 0", fontWeight: 700, color: colorPalette.primary, fontSize: "1.12rem" }}>
+            Join Code:
+          </div>
+          <div style={{ 
+            fontSize: "2.1rem", 
+            fontWeight: 900,
+            letterSpacing: 2,
+            color: colorPalette.accent, 
+            marginBottom: 8,
+            background: "#fffdf6",
+            borderRadius: 10,
+            padding: "7px 0 8px 0",
+            userSelect: "all"
+          }}>
+            {newClassroomCode}
+            <button
+              onClick={() => navigator.clipboard && navigator.clipboard.writeText(newClassroomCode)}
+              title="Copy code"
+              style={{
+                marginLeft: 11,
+                background: "none",
+                border: "none",
+                color: colorPalette.primary,
+                cursor: "pointer",
+                fontSize: 22,
+                verticalAlign: "middle"
+              }}
+            >📋</button>
+          </div>
+          <div style={{ fontSize: 16, color: "#222", fontWeight: 600, marginBottom: 5 }}>
+            Share this link:
+          </div>
+          <div style={{
+            padding: "7px 9px",
+            borderRadius: 7,
+            background: "#fff",
+            border: `1px dotted ${colorPalette.primary}`,
+            color: colorPalette.primary,
+            margin: "0 0 7px 0",
+            fontWeight: 680,
+            fontSize: 15.5,
+            wordBreak: "break-all"
+          }}
+          >
+            <a
+              href={joinUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: colorPalette.primary, textDecoration: "underline", fontWeight: 700, wordBreak: "break-all" }}
+            >{joinUrl}</a>
+            <button
+              onClick={() => navigator.clipboard && navigator.clipboard.writeText(joinUrl)}
+              title="Copy link"
+              style={{
+                marginLeft: 8,
+                background: "none",
+                border: "none",
+                color: colorPalette.accent,
+                cursor: "pointer",
+                fontSize: 18,
+                verticalAlign: "middle"
+              }}
+            >📋</button>
+          </div>
+        </div>
+        <button
+          style={{
+            marginTop: 11,
+            background: colorPalette.primary,
+            color: "#fff",
+            borderRadius: 10,
+            padding: "11px 32px",
+            border: "none",
+            fontWeight: 700,
+            fontFamily: fontStack,
+            fontSize: 17,
+            boxShadow: colorPalette.shadow,
+            cursor: "pointer"
+          }}
+          onClick={() => {
+            setCreated(false);
+            setNewClassroomCode("");
+            setNewClassroomMembers(null);
+            setMembersInput("");
+          }}
+        >Create Another</button>
+      </section>
+    );
+  }
+
+  return (
+    <section
       style={{
-        width: "99%",
-        padding: "13px 12px",
-        borderRadius: 13,
-        border: `1.6px solid ${colorPalette.primary}`,
-        fontSize: 18,
-        marginBottom: 18,
-        outline: "none",
+        margin: "3.3rem auto",
+        background: colorPalette.card,
+        padding: 36,
+        borderRadius: 22,
+        maxWidth: 370,
+        minWidth: 260,
         fontFamily: fontStack,
-        background: colorPalette.bg,
-        color: colorPalette.text,
-        boxShadow: "0 1.5px 6px #f6f6f7"
+        boxShadow: colorPalette.shadow,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center"
       }}
-    />
-    <div style={{ display: "flex", gap: 12, justifyContent: "center", width: "100%" }}>
-      <button
-        style={{
-          flex: 1,
-          background: colorPalette.primary,
-          color: "#fff",
-          fontWeight: 700,
-          borderRadius: 13,
-          padding: "11px 0",
-          border: "none",
-          outline: "none",
-          cursor: "pointer",
-          fontSize: 17,
-          fontFamily: fontStack,
-          transition: "background 0.12s, box-shadow 0.13s"
-        }}
-        onMouseOver={e => { e.currentTarget.style.background = "#337e7d"; }}
-        onMouseOut={e => { e.currentTarget.style.background = colorPalette.primary; }}
-        onFocus={e => { e.currentTarget.style.background = "#337e7d"; }}
-        onBlur={e => { e.currentTarget.style.background = colorPalette.primary; }}
-      >Join
-      </button>
-      <button
-        style={{
-          flex: 1,
-          background: colorPalette.accent,
-          color: "#fff",
-          fontWeight: 700,
-          borderRadius: 13,
-          padding: "11px 0",
-          border: "none",
-          outline: "none",
-          cursor: "pointer",
-          fontSize: 17,
-          fontFamily: fontStack,
-          transition: "background 0.12s, box-shadow 0.13s"
-        }}
-        onMouseOver={e => { e.currentTarget.style.background = "#fa4b6a"; }}
-        onMouseOut={e => { e.currentTarget.style.background = colorPalette.accent; }}
-        onFocus={e => { e.currentTarget.style.background = "#fa4b6a"; }}
-        onBlur={e => { e.currentTarget.style.background = colorPalette.accent; }}
-      >Create
-      </button>
-    </div>
-  </section>
-);
+    >
+      <h2 style={{
+        marginBottom: 20,
+        color: colorPalette.primary,
+        fontWeight: 800,
+        fontFamily: fontStack,
+        fontSize: "1.53rem",
+        letterSpacing: 0.5
+      }}>
+        Join or Create Classroom
+      </h2>
+      <div style={{
+        display: "flex",
+        marginBottom: 15,
+        gap: 7,
+        alignItems: "center",
+        justifyContent: "center",
+        width: "100%"
+      }}>
+        <button
+          onClick={() => setMode("join")}
+          style={{
+            flex: 1,
+            borderRadius: 11,
+            border: "none",
+            fontFamily: fontStack,
+            background: mode === "join" ? colorPalette.secondary : "#fbf7ea",
+            color: mode === "join" ? colorPalette.primary : "#90949f",
+            fontWeight: 800,
+            fontSize: 16,
+            padding: "7px 0",
+            cursor: "pointer",
+            transition: "background 0.14s"
+          }}
+        >🔑 Join</button>
+        <button
+          onClick={() => setMode("create")}
+          style={{
+            flex: 1,
+            borderRadius: 11,
+            border: "none",
+            fontFamily: fontStack,
+            background: mode === "create" ? colorPalette.secondary : "#fbf7ea",
+            color: mode === "create" ? colorPalette.primary : "#90949f",
+            fontWeight: 800,
+            fontSize: 16,
+            padding: "7px 0",
+            cursor: "pointer",
+            transition: "background 0.14s"
+          }}
+        >🎉 Create</button>
+      </div>
+      {mode === "join" ? (
+        <form
+          style={{ width: "100%", marginTop: 2 }}
+          autoComplete="off"
+          onSubmit={handleJoinSubmit}
+        >
+          <input
+            type="text"
+            value={joinCodeInput}
+            onChange={e => setJoinCodeInput(e.target.value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase())}
+            placeholder="Classroom code (e.g. ABC123)"
+            required
+            maxLength={6}
+            style={{
+              width: "99%",
+              padding: "13px 12px",
+              borderRadius: 13,
+              border: `1.6px solid ${colorPalette.primary}`,
+              fontSize: 18,
+              marginBottom: 18,
+              outline: "none",
+              fontFamily: fontStack,
+              background: colorPalette.bg,
+              color: colorPalette.text,
+              boxShadow: "0 1.5px 6px #f6f6f7"
+            }}
+          />
+          <button
+            type="submit"
+            style={{
+              width: "100%",
+              background: colorPalette.primary,
+              color: "#fff",
+              fontWeight: 700,
+              borderRadius: 13,
+              padding: "11px 0",
+              border: "none",
+              outline: "none",
+              cursor: "pointer",
+              fontSize: 17,
+              fontFamily: fontStack,
+              transition: "background 0.12s, box-shadow 0.13s"
+            }}
+            onMouseOver={e => { e.currentTarget.style.background = "#337e7d"; }}
+            onMouseOut={e => { e.currentTarget.style.background = colorPalette.primary; }}
+            onFocus={e => { e.currentTarget.style.background = "#337e7d"; }}
+            onBlur={e => { e.currentTarget.style.background = colorPalette.primary; }}
+          >Join</button>
+        </form>
+      ) : (
+        <form
+          style={{ width: "100%", marginTop: 2 }}
+          autoComplete="off"
+          onSubmit={handleCreateSubmit}
+        >
+          <div style={{ marginBottom: 18 }}>
+            <label
+              htmlFor="number-members"
+              style={{
+                display: "block",
+                fontWeight: 700,
+                marginBottom: 5,
+                color: colorPalette.primary,
+                fontSize: 16
+              }}
+            >Number of members <span style={{ color: colorPalette.accent }}>*</span></label>
+            <input
+              id="number-members"
+              type="number"
+              min={1}
+              max={200}
+              required
+              value={membersInput}
+              onChange={e => {
+                setMembersInput(e.target.value.replace(/[^0-9]/g, ""));
+                setMembersTouched(true);
+              }}
+              style={{
+                width: "100%",
+                padding: "11px 12px",
+                borderRadius: 12,
+                border: membersTouched && (!membersInput || parseInt(membersInput, 10) < 1)
+                  ? `2px solid ${colorPalette.accent}`
+                  : `1.6px solid ${colorPalette.primary}`,
+                fontSize: 17,
+                outline: "none",
+                background: colorPalette.bg,
+                color: colorPalette.text,
+                fontFamily: fontStack,
+              }}
+              aria-required="true"
+            />
+            {membersTouched && (!membersInput || parseInt(membersInput, 10) < 1) && (
+              <div style={{ color: colorPalette.accent, fontSize: 13, marginTop: 4 }}>
+                Please enter a valid, positive member count.
+              </div>
+            )}
+          </div>
+          <button
+            type="submit"
+            disabled={submitting || !membersInput || parseInt(membersInput, 10) < 1}
+            style={{
+              width: "100%",
+              background: colorPalette.accent,
+              color: "#fff",
+              fontWeight: 700,
+              borderRadius: 13,
+              padding: "13px 0",
+              border: "none",
+              outline: "none",
+              cursor: submitting ? "wait" : "pointer",
+              fontSize: 18,
+              fontFamily: fontStack,
+              boxShadow: "0 1.5px 9px #fedaebcf",
+              opacity: submitting ? 0.7 : 1,
+              transition: "background 0.12s, box-shadow 0.13s"
+            }}
+            onMouseOver={e => {
+              if (!submitting) e.currentTarget.style.background = "#fa4b6a";
+            }}
+            onMouseOut={e => {
+              if (!submitting) e.currentTarget.style.background = colorPalette.accent;
+            }}
+            onFocus={e => {
+              if (!submitting) e.currentTarget.style.background = "#fa4b6a";
+            }}
+            onBlur={e => {
+              if (!submitting) e.currentTarget.style.background = colorPalette.accent;
+            }}
+          >
+            {submitting ? "Creating..." : "Create Classroom"}
+          </button>
+        </form>
+      )}
+    </section>
+  );
+};
 
 /**
  * Feature stub cards: Soft backgrounds, playful font, curved cards.

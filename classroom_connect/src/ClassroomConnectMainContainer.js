@@ -543,8 +543,7 @@ const ClassroomJoinCreateForm = ({
 
   // "Create" success confirmation UI
   if (created && mode === "create") {
-    // Show confirmation and share link
-    const joinUrl = `${APP_ORIGIN}/join/${newClassroomCode}`;
+    // Show confirmation: only classroom code and success message, NO share link
     return (
       <section
         style={{
@@ -642,56 +641,12 @@ const ClassroomJoinCreateForm = ({
           <div
             style={{
               fontSize: 16,
-              color: "#222",
-              fontWeight: 600,
-              marginBottom: 5
-            }}
-          >
-            Share this link:
-          </div>
-          <div
-            style={{
-              padding: "7px 9px",
-              borderRadius: 7,
-              background: "#fff",
-              border: `1px dotted ${colorPalette.primary}`,
               color: colorPalette.primary,
-              margin: "0 0 7px 0",
-              fontWeight: 680,
-              fontSize: 15.5,
-              wordBreak: "break-all"
+              fontWeight: 600,
+              marginTop: 10
             }}
           >
-            <a
-              href={joinUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{
-                color: colorPalette.primary,
-                textDecoration: "underline",
-                fontWeight: 700,
-                wordBreak: "break-all"
-              }}
-            >
-              {joinUrl}
-            </a>
-            <button
-              onClick={() =>
-                navigator.clipboard && navigator.clipboard.writeText(joinUrl)
-              }
-              title="Copy link"
-              style={{
-                marginLeft: 8,
-                background: "none",
-                border: "none",
-                color: colorPalette.accent,
-                cursor: "pointer",
-                fontSize: 18,
-                verticalAlign: "middle"
-              }}
-            >
-              📋
-            </button>
+            Classroom created successfully! Share this join code with others to invite them.
           </div>
         </div>
         <button

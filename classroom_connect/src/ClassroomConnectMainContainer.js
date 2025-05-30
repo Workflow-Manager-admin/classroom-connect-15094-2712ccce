@@ -17,139 +17,227 @@ const colorPalette = {
 const fontStack = `'Nunito', 'Quicksand', 'Inter', 'Roboto', 'Helvetica Neue', Arial, sans-serif`;
 
 /**
- * Dashboard: Playful, friendly, student card overview with hoverable "Add" card.
+ * Dashboard: Lists classrooms joined from local/session storage, or prompts to join; integrated with playful UI.
  */
-const Dashboard = () => (
-  <section
-    style={{
-      textAlign: "center",
-      marginTop: 60,
-      fontFamily: fontStack,
-      background: "transparent"
-    }}
-  >
-    <h2 style={{
-      color: colorPalette.primary,
-      marginBottom: 8,
-      fontWeight: 900,
-      fontFamily: fontStack,
-      fontSize: "2.1rem",
-      letterSpacing: 1
-    }}>
-      Your Classrooms
-    </h2>
-    <p style={{
-      color: colorPalette.text,
-      fontWeight: 500,
-      marginBottom: 25,
-      letterSpacing: 0.15,
-      fontSize: 17
-    }}>Check your joined classrooms or add a new one!</p>
-    <div style={{
-      margin: "2.4rem auto 1.6rem",
-      display: "flex",
-      gap: "2.2rem",
-      justifyContent: "center",
-      flexWrap: "wrap",
-      background: "transparent"
-    }}>
-      {/* Example of a joined classroom (stubbed) */}
-      <div
-        style={{
-          background: colorPalette.card,
-          borderRadius: 20,
-          width: 200,
-          height: 128,
+const Dashboard = ({ onGoToJoinCreate }) => {
+  const [myClassrooms, setMyClassrooms] = React.useState([]);
+  React.useEffect(() => {
+    // Prefer localStorage, fallback to sessionStorage
+    let classesRaw = (typeof window !== "undefined") && (window.localStorage?.getItem("classroomconnect_myclassrooms") ||
+      window.sessionStorage?.getItem("classroomconnect_myclassrooms"));
+    let list = [];
+    try {
+      // Support legacy format: comma string or JSON array of {code, members}
+      if (classesRaw) {
+        if (classesRaw.trim().startsWith("[")) {
+          list = JSON.parse(classesRaw);
+        } else {
+          // Comma-separated codes
+          list = classesRaw.split(",").map(s => ({ code: s.trim(), members: null }));
+        }
+      }
+    } catch {
+      list = [];
+    }
+    setMyClassrooms(Array.isArray(list) ? list : []);
+  }, []);
+
+  // Add Classroom event handler
+  const handleAddClassroom = () => {
+    if (typeof onGoToJoinCreate === "function") onGoToJoinCreate();
+  };
+
+  return (
+    <section
+      style={{
+        textAlign: "center",
+        marginTop: 60,
+        fontFamily: fontStack,
+        background: "transparent"
+      }}
+    >
+      <h2 style={{
+        color: colorPalette.primary,
+        marginBottom: 8,
+        fontWeight: 900,
+        fontFamily: fontStack,
+        fontSize: "2.1rem",
+        letterSpacing: 1
+      }}>
+        Your Classrooms
+      </h2>
+      {myClassrooms.length > 0 ? (
+        <>
+        <p style={{
+          color: colorPalette.text,
+          fontWeight: 500,
+          marginBottom: 25,
+          letterSpacing: 0.15,
+          fontSize: 17
+        }}>Here's a list of classrooms you've joined!</p>
+        <div style={{
+          margin: "2.4rem auto 1.6rem",
           display: "flex",
-          alignItems: "center",
+          gap: "2.2rem",
           justifyContent: "center",
-          boxShadow: colorPalette.shadow,
-          fontWeight: 700,
-          color: colorPalette.primary,
-          fontFamily: fontStack,
-          transition: "transform 0.14s, box-shadow 0.15s",
-          cursor: "pointer",
-          fontSize: "1.15rem",
-          position: "relative"
-        }}
-        tabIndex={0}
-        onMouseOver={e => {
-          e.currentTarget.style.transform = "scale(1.04)";
-          e.currentTarget.style.boxShadow = "0 8px 32px 0 #ffe8bb";
-        }}
-        onMouseOut={e => {
-          e.currentTarget.style.transform = "";
-          e.currentTarget.style.boxShadow = colorPalette.shadow;
-        }}
-        onFocus={e => {
-          e.currentTarget.style.transform = "scale(1.04)";
-          e.currentTarget.style.boxShadow = "0 8px 32px 0 #ffe8bb";
-        }}
-        onBlur={e => {
-          e.currentTarget.style.transform = "";
-          e.currentTarget.style.boxShadow = colorPalette.shadow;
-        }}
-        aria-label="Classroom Example Card"
-      >
-        <span role="img" aria-label="green notebook" style={{ fontSize: "1.6em", marginRight: 10 }}>📗</span>
-        Sample Classroom
-      </div>
-      {/* Add Classroom Card */}
-      <div
-        style={{
-          background: colorPalette.accent,
-          borderRadius: 20,
-          width: 200,
-          height: 128,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          fontWeight: 700,
-          color: "#fff",
-          fontFamily: fontStack,
-          fontSize: "1.12rem",
-          boxShadow: colorPalette.shadow,
-          cursor: "pointer",
-          transition: "transform 0.14s, box-shadow 0.15s, background 0.13s",
-          outline: "none",
-          position: "relative"
-        }}
-        tabIndex={0}
-        aria-label="Add Classroom"
-        onMouseOver={e => {
-          e.currentTarget.style.transform = "scale(1.06)";
-          e.currentTarget.style.background = "#fa4b6a";
-        }}
-        onMouseOut={e => {
-          e.currentTarget.style.transform = "";
-          e.currentTarget.style.background = colorPalette.accent;
-        }}
-        onFocus={e => {
-          e.currentTarget.style.transform = "scale(1.06)";
-          e.currentTarget.style.background = "#fa4b6a";
-        }}
-        onBlur={e => {
-          e.currentTarget.style.transform = "";
-          e.currentTarget.style.background = colorPalette.accent;
-        }}
-      >
-        <span
-          style={{
-            marginRight: 13,
-            fontSize: "1.6em",
-            display: "inline-block",
-            filter: "drop-shadow(0 2px 5px #ffd7e1)"
-          }}
-          role="img"
-          aria-label="add"
-        >
-          ➕
-        </span>
-        Add Classroom
-      </div>
-    </div>
-  </section>
-);
+          flexWrap: "wrap",
+          background: "transparent"
+        }}>
+          {myClassrooms.map((classroom, idx) => (
+            <div
+              key={classroom.code || idx}
+              style={{
+                background: colorPalette.card,
+                borderRadius: 20,
+                width: 200,
+                height: 128,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                boxShadow: colorPalette.shadow,
+                fontWeight: 700,
+                color: colorPalette.primary,
+                fontFamily: fontStack,
+                transition: "transform 0.14s, box-shadow 0.15s",
+                cursor: "pointer",
+                fontSize: "1.15rem",
+                position: "relative"
+              }}
+              tabIndex={0}
+              onMouseOver={e => {
+                e.currentTarget.style.transform = "scale(1.04)";
+                e.currentTarget.style.boxShadow = "0 8px 32px 0 #ffe8bb";
+              }}
+              onMouseOut={e => {
+                e.currentTarget.style.transform = "";
+                e.currentTarget.style.boxShadow = colorPalette.shadow;
+              }}
+              onFocus={e => {
+                e.currentTarget.style.transform = "scale(1.04)";
+                e.currentTarget.style.boxShadow = "0 8px 32px 0 #ffe8bb";
+              }}
+              onBlur={e => {
+                e.currentTarget.style.transform = "";
+                e.currentTarget.style.boxShadow = colorPalette.shadow;
+              }}
+              aria-label={`Classroom ${classroom.code}`}
+              title={`Classroom Code: ${classroom.code}${classroom.members ? ` (${classroom.members} members)` : ""}`}
+            >
+              <span role="img" aria-label="notebook" style={{ fontSize: "1.6em", marginRight: 10 }}>📗</span>
+              <span>
+                {classroom.code}
+                {classroom.members ? (
+                  <span style={{ color: colorPalette.accent, marginLeft: 5, fontWeight: 600, fontSize: 15 }}>({classroom.members})</span>
+                ) : null}
+              </span>
+            </div>
+          ))}
+          {/* Add more classroom button card */}
+          <div
+            style={{
+              background: colorPalette.accent,
+              borderRadius: 20,
+              width: 200,
+              height: 128,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontWeight: 700,
+              color: "#fff",
+              fontFamily: fontStack,
+              fontSize: "1.12rem",
+              boxShadow: colorPalette.shadow,
+              cursor: "pointer",
+              transition: "transform 0.14s, box-shadow 0.15s, background 0.13s",
+              outline: "none",
+              position: "relative"
+            }}
+            tabIndex={0}
+            aria-label="Add Classroom"
+            onClick={handleAddClassroom}
+            onMouseOver={e => {
+              e.currentTarget.style.transform = "scale(1.06)";
+              e.currentTarget.style.background = "#fa4b6a";
+            }}
+            onMouseOut={e => {
+              e.currentTarget.style.transform = "";
+              e.currentTarget.style.background = colorPalette.accent;
+            }}
+            onFocus={e => {
+              e.currentTarget.style.transform = "scale(1.06)";
+              e.currentTarget.style.background = "#fa4b6a";
+            }}
+            onBlur={e => {
+              e.currentTarget.style.transform = "";
+              e.currentTarget.style.background = colorPalette.accent;
+            }}
+          >
+            <span
+              style={{
+                marginRight: 13,
+                fontSize: "1.6em",
+                display: "inline-block",
+                filter: "drop-shadow(0 2px 5px #ffd7e1)"
+              }}
+              role="img"
+              aria-label="add"
+            >
+              ➕
+            </span>
+            Add Classroom
+          </div>
+        </div>
+        </>
+      ) : (
+        <div style={{ margin: "2.2rem auto 2.6rem", display: "flex", flexDirection: "column", alignItems: "center" }}>
+          <p style={{
+            fontSize: 19,
+            color: colorPalette.text,
+            fontWeight: 700,
+            marginBottom: 23
+          }}>
+            You're not in any classrooms yet!
+          </p>
+          <button
+            style={{
+              background: colorPalette.accent,
+              color: "#fff",
+              border: "none",
+              borderRadius: 18,
+              padding: "17px 48px",
+              fontWeight: 850,
+              fontSize: 19,
+              fontFamily: fontStack,
+              boxShadow: colorPalette.shadow,
+              cursor: "pointer",
+              margin: "0 auto",
+              marginBottom: 9,
+              transition: "background 0.15s"
+            }}
+            onClick={handleAddClassroom}
+            onMouseOver={e => { e.currentTarget.style.background = "#fa4b6a"; }}
+            onMouseOut={e => { e.currentTarget.style.background = colorPalette.accent; }}
+            onFocus={e => { e.currentTarget.style.background = "#fa4b6a"; }}
+            onBlur={e => { e.currentTarget.style.background = colorPalette.accent; }}
+            tabIndex={0}
+            aria-label="Join/Create a Classroom"
+          >
+            ➕ Join or Create a Classroom
+          </button>
+          <span style={{
+            color: colorPalette.primary,
+            fontWeight: 500,
+            fontSize: 15.5,
+            marginTop: 7,
+            opacity: 0.83
+          }}>
+            Once you join, your classrooms will show here!
+          </span>
+        </div>
+      )}
+    </section>
+  );
+};
 
 /**
  * Classroom joining/creation form, cheerful card-like design,

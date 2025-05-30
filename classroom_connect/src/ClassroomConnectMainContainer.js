@@ -175,8 +175,18 @@ const ClassroomJoinCreateForm = () => {
   const [newClassroomCode, setNewClassroomCode] = useState("");
   const [newClassroomMembers, setNewClassroomMembers] = useState(null);
 
-  // Demo: host for the join link (adjust as needed)
-  const APP_ORIGIN = "https://yourapp.com"; // Could also use window.location.origin
+  // Backend config (update port if needed)
+  const BACKEND_URL = "http://localhost:4555";
+  // Use actual app origin for join link
+  const APP_ORIGIN = typeof window !== "undefined" && window.location && window.location.origin
+    ? window.location.origin
+    : "https://yourapp.com";
+
+  // Feedback state
+  const [joinError, setJoinError] = useState("");
+  const [joinLoading, setJoinLoading] = useState(false);
+  const [createError, setCreateError] = useState("");
+  const [joinSuccessInfo, setJoinSuccessInfo] = useState(null);
 
   // Reset when mode changes
   React.useEffect(() => {
@@ -186,36 +196,101 @@ const ClassroomJoinCreateForm = () => {
     setNewClassroomCode("");
     setNewClassroomMembers(null);
     setMembersTouched(false);
+    setJoinError("");
+    setCreateError("");
+    setJoinSuccessInfo(null);
+    setSubmitting(false);
+    setJoinLoading(false);
   }, [mode]);
 
-  const handleJoinSubmit = (e) => {
+  // PUBLIC_INTERFACE
+  const handleJoinSubmit = async (e) => {
     e.preventDefault();
-    // For demo: stub join logic
-    // In real app, validate/join call here
-    alert(`Joining classroom: ${joinCodeInput.trim().toUpperCase()}`);
+    setJoinError("");
+    setJoinLoading(true);
+    setJoinSuccessInfo(null);
+
+    const code = joinCodeInput.trim().toUpperCase();
+    if (!/^[A-Z0-9]{6}$/.test(code)) {
+      setJoinError("Enter a valid 6-letter/digit code.");
+      setJoinLoading(false);
+      return;
+    }
+
+    try {
+      const res = await fetch(`${BACKEND_URL}/classrooms/${code}`);
+      if (res.status === 404) {
+        setJoinError("Classroom not found. Check your code and try again.");
+      } else if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        setJoinError(data?.error || "Failed to join classroom.");
+      } else {
+        const body = await res.json();
+        // Success! Optionally, record membership in localStorage/session here.
+        setJoinError("");
+        setJoinSuccessInfo(body.classroom);
+        // alert(`Joined classroom "${body.classroom.code}"!`);
+      }
+    } catch (err) {
+      setJoinError("Network error – could not reach backend.");
+    }
+    setJoinLoading(false);
     setJoinCodeInput("");
   };
 
-  const handleCreateSubmit = (e) => {
+  // PUBLIC_INTERFACE
+  const handleCreateSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
+    setCreateError("");
+    setJoinError("");
+    setJoinSuccessInfo(null);
+
     // Validate member count
     const count = parseInt(membersInput, 10);
     if (isNaN(count) || count < 1) {
       setSubmitting(false);
       setMembersTouched(true);
+      setCreateError("Invalid members count.");
       return;
     }
-    // Generate code and set created state
+    // Generate classroom code
     const code = generateClassroomCode();
-    setNewClassroomCode(code);
-    setNewClassroomMembers(count);
-    setTimeout(() => {
+
+    // POST to backend
+    try {
+      const res = await fetch(`${BACKEND_URL}/classrooms`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code, members: count }),
+      });
+      if (res.status === 409) {
+        setCreateError("Classroom code already exists. Try again.");
+        setSubmitting(false);
+        return;
+      }
+      if (res.status === 400) {
+        const data = await res.json().catch(() => ({}));
+        setCreateError(data?.error || "Invalid classroom data.");
+        setSubmitting(false);
+        return;
+      }
+      if (!res.ok) {
+        setCreateError("Unknown error – failed to create classroom.");
+        setSubmitting(false);
+        return;
+      }
+      // Success: show confirmation
+      setNewClassroomCode(code);
+      setNewClassroomMembers(count);
       setCreated(true);
-      setSubmitting(false);
-    }, 300); // simulate delay
+    } catch (err) {
+      setCreateError("Network error – could not reach backend.");
+    }
+    setSubmitting(false);
   };
 
+  // "Create" success confirmation UI
   if (created && mode === "create") {
     // Show confirmation and share link
     const joinUrl = `${APP_ORIGIN}/join/${newClassroomCode}`;

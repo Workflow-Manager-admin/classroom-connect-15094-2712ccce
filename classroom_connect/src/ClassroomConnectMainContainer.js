@@ -1594,6 +1594,7 @@ export const ClassroomConnectMainContainer = () => {
   // ClassroomView: now gets classroom prop and return handler
   const ClassroomViewContainer = ({ classroom }) => {
     let stats = null;
+    let className = null;
     if (
       window._classroomConnectInMemoryClassrooms &&
       classroom.code
@@ -1606,7 +1607,12 @@ export const ClassroomConnectMainContainer = () => {
           current: real.currentMembers,
           max: real.maxMembers,
         };
+        className = real.name || null;
       }
+    }
+    // Fallback: if className was carried in local storage or prop
+    if (!className && classroom.name) {
+      className = classroom.name;
     }
     return (
       <div>
@@ -1638,6 +1644,26 @@ export const ClassroomConnectMainContainer = () => {
             ← Back to Dashboard
           </button>
         </div>
+        {/* Classroom Name prominently at the top */}
+        {className && (
+          <div
+            style={{
+              fontSize: "2.3rem",
+              fontWeight: 900,
+              letterSpacing: 0.5,
+              textAlign: "center",
+              color: colorPalette.primary,
+              marginTop: 22,
+              marginBottom: 8,
+              fontFamily: fontStack,
+              textShadow: "0 1.5px 5px #eaf6ef82",
+              wordBreak: "break-word",
+              lineHeight: 1.18,
+            }}
+          >
+            {className}
+          </div>
+        )}
         <h2
           style={{
             color: colorPalette.primary,
@@ -1646,7 +1672,7 @@ export const ClassroomConnectMainContainer = () => {
             letterSpacing: 1,
             fontSize: "2.0rem",
             marginBottom: 6,
-            marginTop: 24,
+            marginTop: className ? 4 : 24,
             textAlign: "center",
           }}
         >

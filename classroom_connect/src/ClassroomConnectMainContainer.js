@@ -17,26 +17,24 @@ const colorPalette = {
 const fontStack = `'Nunito', 'Quicksand', 'Inter', 'Roboto', 'Helvetica Neue', Arial, sans-serif`;
 
 /**
- * Dashboard: Lists classrooms joined from local/session storage, or prompts to join; integrated with playful UI.
- */
-/**
- * Read ALL classrooms for this user from browser storage.
- * This helper can be reused to sync across UI.
- * Always returns an array.
+ * PUBLIC_INTERFACE
+ * Helper: Read ALL classrooms for this user from browser storage.
+ * Used everywhere joined classrooms list needs to be read.
  */
 function getAllMyClassroomsFromStorage() {
-  let classesRaw = (typeof window !== "undefined") &&
-    (window.localStorage?.getItem("classroomconnect_myclassrooms") ||
-     window.sessionStorage?.getItem("classroomconnect_myclassrooms"));
+  let classesRaw =
+    (typeof window !== "undefined" &&
+      (window.localStorage?.getItem("classroomconnect_myclassrooms") ||
+        window.sessionStorage?.getItem("classroomconnect_myclassrooms"))) || "";
   let list = [];
   try {
-    // Support legacy format: comma string or JSON array of {code, members}
     if (classesRaw) {
       if (classesRaw.trim().startsWith("[")) {
         list = JSON.parse(classesRaw);
       } else {
-        // Comma-separated codes
-        list = classesRaw.split(",").map(s => ({ code: s.trim(), members: null }));
+        list = classesRaw
+          .split(",")
+          .map((s) => ({ code: s.trim(), members: null }));
       }
     }
   } catch {
@@ -46,23 +44,42 @@ function getAllMyClassroomsFromStorage() {
 }
 
 /**
- * Dashboard: Lists all classrooms, OR lets user join if none.
- * Accepts onGoToJoinCreate prop for "add classroom" action,
- * and can easily accept instant updates with setClassrooms in future.
+ * PUBLIC_INTERFACE
+ * Helper: Add a classroom to localStorage/session, synchronizing both storage and state.
+ * No-op if class already exists.
  */
-const Dashboard = ({ onGoToJoinCreate }) => {
-  const [myClassrooms, setMyClassrooms] = React.useState(getAllMyClassroomsFromStorage());
-  // In the future: pass setMyClassrooms via context or handle updates in parent for real-time updates
+function addClassroomToStorage(classroom, updateListState) {
+  if (!classroom?.code) return;
+  const code = classroom.code.toUpperCase();
+  let list = getAllMyClassroomsFromStorage();
+  if (list.find((c) => c.code === code)) return; // already joined
+  list.push({
+    code,
+    members: classroom.members != null ? classroom.members : null
+  });
+  try {
+    window.localStorage?.setItem(
+      "classroomconnect_myclassrooms",
+      JSON.stringify(list)
+    );
+    window.sessionStorage?.setItem(
+      "classroomconnect_myclassrooms",
+      JSON.stringify(list)
+    );
+  } catch {}
+  if (typeof updateListState === "function") updateListState([...list]);
+}
 
-  // Re-sync from storage on dashboard mount (and when tab regains focus)
+// Dashboard lists classrooms and triggers updates when list/state changes.
+const Dashboard = ({ myClassrooms, setMyClassrooms, onGoToJoinCreate }) => {
+  // Re-sync from storage on dashboard mount and when tab regains focus
   React.useEffect(() => {
     const refresh = () => setMyClassrooms(getAllMyClassroomsFromStorage());
     window.addEventListener("focus", refresh);
-    refresh(); // load now as well
+    refresh();
     return () => window.removeEventListener("focus", refresh);
-  }, []);
+  }, [setMyClassrooms]);
 
-  // Add Classroom event handler
   const handleAddClassroom = () => {
     if (typeof onGoToJoinCreate === "function") onGoToJoinCreate();
   };
@@ -76,146 +93,177 @@ const Dashboard = ({ onGoToJoinCreate }) => {
         background: "transparent"
       }}
     >
-      <h2 style={{
-        color: colorPalette.primary,
-        marginBottom: 8,
-        fontWeight: 900,
-        fontFamily: fontStack,
-        fontSize: "2.1rem",
-        letterSpacing: 1
-      }}>
+      <h2
+        style={{
+          color: colorPalette.primary,
+          marginBottom: 8,
+          fontWeight: 900,
+          fontFamily: fontStack,
+          fontSize: "2.1rem",
+          letterSpacing: 1
+        }}
+      >
         Your Classrooms
       </h2>
       {myClassrooms.length > 0 ? (
         <>
-        <p style={{
-          color: colorPalette.text,
-          fontWeight: 500,
-          marginBottom: 25,
-          letterSpacing: 0.15,
-          fontSize: 17
-        }}>Here's a list of classrooms you've joined!</p>
-        <div style={{
-          margin: "2.4rem auto 1.6rem",
-          display: "flex",
-          gap: "2.2rem",
-          justifyContent: "center",
-          flexWrap: "wrap",
-          background: "transparent"
-        }}>
-          {myClassrooms.map((classroom, idx) => (
+          <p
+            style={{
+              color: colorPalette.text,
+              fontWeight: 500,
+              marginBottom: 25,
+              letterSpacing: 0.15,
+              fontSize: 17
+            }}
+          >
+            Here's a list of classrooms you've joined!
+          </p>
+          <div
+            style={{
+              margin: "2.4rem auto 1.6rem",
+              display: "flex",
+              gap: "2.2rem",
+              justifyContent: "center",
+              flexWrap: "wrap",
+              background: "transparent"
+            }}
+          >
+            {myClassrooms.map((classroom, idx) => (
+              <div
+                key={classroom.code || idx}
+                style={{
+                  background: colorPalette.card,
+                  borderRadius: 20,
+                  width: 200,
+                  height: 128,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  boxShadow: colorPalette.shadow,
+                  fontWeight: 700,
+                  color: colorPalette.primary,
+                  fontFamily: fontStack,
+                  transition: "transform 0.14s, box-shadow 0.15s",
+                  cursor: "pointer",
+                  fontSize: "1.15rem",
+                  position: "relative"
+                }}
+                tabIndex={0}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.transform = "scale(1.04)";
+                  e.currentTarget.style.boxShadow = "0 8px 32px 0 #ffe8bb";
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.transform = "";
+                  e.currentTarget.style.boxShadow = colorPalette.shadow;
+                }}
+                onFocus={(e) => {
+                  e.currentTarget.style.transform = "scale(1.04)";
+                  e.currentTarget.style.boxShadow = "0 8px 32px 0 #ffe8bb";
+                }}
+                onBlur={(e) => {
+                  e.currentTarget.style.transform = "";
+                  e.currentTarget.style.boxShadow = colorPalette.shadow;
+                }}
+                aria-label={`Classroom ${classroom.code}`}
+                title={`Classroom Code: ${classroom.code}${classroom.members ? ` (${classroom.members} members)` : ""}`}
+              >
+                <span
+                  role="img"
+                  aria-label="notebook"
+                  style={{ fontSize: "1.6em", marginRight: 10 }}
+                >
+                  📗
+                </span>
+                <span>
+                  {classroom.code}
+                  {classroom.members ? (
+                    <span
+                      style={{
+                        color: colorPalette.accent,
+                        marginLeft: 5,
+                        fontWeight: 600,
+                        fontSize: 15
+                      }}
+                    >
+                      ({classroom.members})
+                    </span>
+                  ) : null}
+                </span>
+              </div>
+            ))}
             <div
-              key={classroom.code || idx}
               style={{
-                background: colorPalette.card,
+                background: colorPalette.accent,
                 borderRadius: 20,
                 width: 200,
                 height: 128,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                boxShadow: colorPalette.shadow,
                 fontWeight: 700,
-                color: colorPalette.primary,
+                color: "#fff",
                 fontFamily: fontStack,
-                transition: "transform 0.14s, box-shadow 0.15s",
+                fontSize: "1.12rem",
+                boxShadow: colorPalette.shadow,
                 cursor: "pointer",
-                fontSize: "1.15rem",
+                transition: "transform 0.14s, box-shadow 0.15s, background 0.13s",
+                outline: "none",
                 position: "relative"
               }}
               tabIndex={0}
-              onMouseOver={e => {
-                e.currentTarget.style.transform = "scale(1.04)";
-                e.currentTarget.style.boxShadow = "0 8px 32px 0 #ffe8bb";
+              aria-label="Add Classroom"
+              onClick={handleAddClassroom}
+              onMouseOver={(e) => {
+                e.currentTarget.style.transform = "scale(1.06)";
+                e.currentTarget.style.background = "#fa4b6a";
               }}
-              onMouseOut={e => {
+              onMouseOut={(e) => {
                 e.currentTarget.style.transform = "";
-                e.currentTarget.style.boxShadow = colorPalette.shadow;
+                e.currentTarget.style.background = colorPalette.accent;
               }}
-              onFocus={e => {
-                e.currentTarget.style.transform = "scale(1.04)";
-                e.currentTarget.style.boxShadow = "0 8px 32px 0 #ffe8bb";
+              onFocus={(e) => {
+                e.currentTarget.style.transform = "scale(1.06)";
+                e.currentTarget.style.background = "#fa4b6a";
               }}
-              onBlur={e => {
+              onBlur={(e) => {
                 e.currentTarget.style.transform = "";
-                e.currentTarget.style.boxShadow = colorPalette.shadow;
+                e.currentTarget.style.background = colorPalette.accent;
               }}
-              aria-label={`Classroom ${classroom.code}`}
-              title={`Classroom Code: ${classroom.code}${classroom.members ? ` (${classroom.members} members)` : ""}`}
             >
-              <span role="img" aria-label="notebook" style={{ fontSize: "1.6em", marginRight: 10 }}>📗</span>
-              <span>
-                {classroom.code}
-                {classroom.members ? (
-                  <span style={{ color: colorPalette.accent, marginLeft: 5, fontWeight: 600, fontSize: 15 }}>({classroom.members})</span>
-                ) : null}
+              <span
+                style={{
+                  marginRight: 13,
+                  fontSize: "1.6em",
+                  display: "inline-block",
+                  filter: "drop-shadow(0 2px 5px #ffd7e1)"
+                }}
+                role="img"
+                aria-label="add"
+              >
+                ➕
               </span>
+              Add Classroom
             </div>
-          ))}
-          {/* Always show a clear way to join/add a classroom */}
-          <div
-            style={{
-              background: colorPalette.accent,
-              borderRadius: 20,
-              width: 200,
-              height: 128,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontWeight: 700,
-              color: "#fff",
-              fontFamily: fontStack,
-              fontSize: "1.12rem",
-              boxShadow: colorPalette.shadow,
-              cursor: "pointer",
-              transition: "transform 0.14s, box-shadow 0.15s, background 0.13s",
-              outline: "none",
-              position: "relative"
-            }}
-            tabIndex={0}
-            aria-label="Add Classroom"
-            onClick={handleAddClassroom}
-            onMouseOver={e => {
-              e.currentTarget.style.transform = "scale(1.06)";
-              e.currentTarget.style.background = "#fa4b6a";
-            }}
-            onMouseOut={e => {
-              e.currentTarget.style.transform = "";
-              e.currentTarget.style.background = colorPalette.accent;
-            }}
-            onFocus={e => {
-              e.currentTarget.style.transform = "scale(1.06)";
-              e.currentTarget.style.background = "#fa4b6a";
-            }}
-            onBlur={e => {
-              e.currentTarget.style.transform = "";
-              e.currentTarget.style.background = colorPalette.accent;
-            }}
-          >
-            <span
-              style={{
-                marginRight: 13,
-                fontSize: "1.6em",
-                display: "inline-block",
-                filter: "drop-shadow(0 2px 5px #ffd7e1)"
-              }}
-              role="img"
-              aria-label="add"
-            >
-              ➕
-            </span>
-            Add Classroom
           </div>
-        </div>
         </>
       ) : (
-        <div style={{ margin: "2.2rem auto 2.6rem", display: "flex", flexDirection: "column", alignItems: "center" }}>
-          <p style={{
-            fontSize: 19,
-            color: colorPalette.text,
-            fontWeight: 700,
-            marginBottom: 23
-          }}>
+        <div
+          style={{
+            margin: "2.2rem auto 2.6rem",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center"
+          }}
+        >
+          <p
+            style={{
+              fontSize: 19,
+              color: colorPalette.text,
+              fontWeight: 700,
+              marginBottom: 23
+            }}
+          >
             You're not in any classrooms yet!
           </p>
           <button
@@ -235,22 +283,32 @@ const Dashboard = ({ onGoToJoinCreate }) => {
               transition: "background 0.15s"
             }}
             onClick={handleAddClassroom}
-            onMouseOver={e => { e.currentTarget.style.background = "#fa4b6a"; }}
-            onMouseOut={e => { e.currentTarget.style.background = colorPalette.accent; }}
-            onFocus={e => { e.currentTarget.style.background = "#fa4b6a"; }}
-            onBlur={e => { e.currentTarget.style.background = colorPalette.accent; }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.background = "#fa4b6a";
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.background = colorPalette.accent;
+            }}
+            onFocus={(e) => {
+              e.currentTarget.style.background = "#fa4b6a";
+            }}
+            onBlur={(e) => {
+              e.currentTarget.style.background = colorPalette.accent;
+            }}
             tabIndex={0}
             aria-label="Join/Create a Classroom"
           >
             ➕ Join or Create a Classroom
           </button>
-          <span style={{
-            color: colorPalette.primary,
-            fontWeight: 500,
-            fontSize: 15.5,
-            marginTop: 7,
-            opacity: 0.83
-          }}>
+          <span
+            style={{
+              color: colorPalette.primary,
+              fontWeight: 500,
+              fontSize: 15.5,
+              marginTop: 7,
+              opacity: 0.83
+            }}
+          >
             Once you join, your classrooms will show here!
           </span>
         </div>
@@ -260,20 +318,23 @@ const Dashboard = ({ onGoToJoinCreate }) => {
 };
 
 /**
- * Classroom joining/creation form, cheerful card-like design,
- * now with Number of Members input (required for 'Create'),
- * classroom code auto-generation, and shareable link display.
+ * Join/create classroom form. On join, validates against backend and emits storage/state update.
  */
 const generateClassroomCode = () => {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-  let result = '';
+  let result = "";
   for (let i = 0; i < 6; ++i) {
     result += chars[Math.floor(Math.random() * chars.length)];
   }
   return result;
 };
 
-const ClassroomJoinCreateForm = ({ myClassrooms, setMyClassrooms, onJoinedClassroom, setMainView }) => {
+const ClassroomJoinCreateForm = ({
+  myClassrooms,
+  setMyClassrooms,
+  onJoinedClassroom,
+  setMainView
+}) => {
   const [mode, setMode] = useState("join"); // or "create"
   const [joinCodeInput, setJoinCodeInput] = useState("");
   const [membersInput, setMembersInput] = useState("");
@@ -286,9 +347,12 @@ const ClassroomJoinCreateForm = ({ myClassrooms, setMyClassrooms, onJoinedClassr
   // Backend config (update port if needed)
   const BACKEND_URL = "http://localhost:4555";
   // Use actual app origin for join link
-  const APP_ORIGIN = typeof window !== "undefined" && window.location && window.location.origin
-    ? window.location.origin
-    : "https://yourapp.com";
+  const APP_ORIGIN =
+    typeof window !== "undefined" &&
+    window.location &&
+    window.location.origin
+      ? window.location.origin
+      : "https://yourapp.com";
 
   // Feedback state
   const [joinError, setJoinError] = useState("");
@@ -311,7 +375,7 @@ const ClassroomJoinCreateForm = ({ myClassrooms, setMyClassrooms, onJoinedClassr
     setJoinLoading(false);
   }, [mode]);
 
-  // PUBLIC_INTERFACE
+  // PUBLIC_INTERFACE (Join)
   const handleJoinSubmit = async (e) => {
     e.preventDefault();
     setJoinError("");
@@ -336,11 +400,10 @@ const ClassroomJoinCreateForm = ({ myClassrooms, setMyClassrooms, onJoinedClassr
         const body = await res.json();
         setJoinError("");
         setJoinSuccessInfo(body.classroom);
-        // Add to storage and state, then redirect to dashboard or show success.
         addClassroomToStorage(body.classroom, setMyClassrooms);
-        // Optionally notify parent
-        if (typeof onJoinedClassroom === "function") onJoinedClassroom(body.classroom);
-        // Briefly show success then go to dashboard for instant feedback.
+        if (typeof onJoinedClassroom === "function")
+          onJoinedClassroom(body.classroom);
+        // After showing success, go to dashboard
         setTimeout(() => typeof setMainView === "function" && setMainView("dashboard"), 1050);
       }
     } catch (err) {
@@ -350,7 +413,7 @@ const ClassroomJoinCreateForm = ({ myClassrooms, setMyClassrooms, onJoinedClassr
     setJoinCodeInput("");
   };
 
-  // PUBLIC_INTERFACE
+  // PUBLIC_INTERFACE (Create)
   const handleCreateSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
@@ -374,7 +437,7 @@ const ClassroomJoinCreateForm = ({ myClassrooms, setMyClassrooms, onJoinedClassr
       const res = await fetch(`${BACKEND_URL}/classrooms`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code, members: count }),
+        body: JSON.stringify({ code, members: count })
       });
       if (res.status === 409) {
         setCreateError("Classroom code already exists. Try again.");
@@ -422,17 +485,27 @@ const ClassroomJoinCreateForm = ({ myClassrooms, setMyClassrooms, onJoinedClassr
           alignItems: "center"
         }}
       >
-        <h2 style={{
-          marginBottom: 16,
-          color: colorPalette.primary,
-          fontWeight: 800,
-          fontFamily: fontStack,
-          fontSize: "1.45rem",
-        }}>
+        <h2
+          style={{
+            marginBottom: 16,
+            color: colorPalette.primary,
+            fontWeight: 800,
+            fontFamily: fontStack,
+            fontSize: "1.45rem"
+          }}
+        >
           🎉 Classroom Created!
         </h2>
-        <div style={{ fontWeight: 700, fontSize: 17.5, color: colorPalette.accent, margin: "8px 0 12px 0" }}>
-          {newClassroomMembers} member{newClassroomMembers > 1 ? "s" : ""} (limit)
+        <div
+          style={{
+            fontWeight: 700,
+            fontSize: 17.5,
+            color: colorPalette.accent,
+            margin: "8px 0 12px 0"
+          }}
+        >
+          {newClassroomMembers} member
+          {newClassroomMembers > 1 ? "s" : ""} (limit)
         </div>
         <div
           style={{
@@ -447,23 +520,35 @@ const ClassroomJoinCreateForm = ({ myClassrooms, setMyClassrooms, onJoinedClassr
             boxShadow: "0 1.5px 8px #f0f5e6a8"
           }}
         >
-          <div style={{ margin: "0 0 7px 0", fontWeight: 700, color: colorPalette.primary, fontSize: "1.12rem" }}>
+          <div
+            style={{
+              margin: "0 0 7px 0",
+              fontWeight: 700,
+              color: colorPalette.primary,
+              fontSize: "1.12rem"
+            }}
+          >
             Join Code:
           </div>
-          <div style={{ 
-            fontSize: "2.1rem", 
-            fontWeight: 900,
-            letterSpacing: 2,
-            color: colorPalette.accent, 
-            marginBottom: 8,
-            background: "#fffdf6",
-            borderRadius: 10,
-            padding: "7px 0 8px 0",
-            userSelect: "all"
-          }}>
+          <div
+            style={{
+              fontSize: "2.1rem",
+              fontWeight: 900,
+              letterSpacing: 2,
+              color: colorPalette.accent,
+              marginBottom: 8,
+              background: "#fffdf6",
+              borderRadius: 10,
+              padding: "7px 0 8px 0",
+              userSelect: "all"
+            }}
+          >
             {newClassroomCode}
             <button
-              onClick={() => navigator.clipboard && navigator.clipboard.writeText(newClassroomCode)}
+              onClick={() =>
+                navigator.clipboard &&
+                navigator.clipboard.writeText(newClassroomCode)
+              }
               title="Copy code"
               style={{
                 marginLeft: 11,
@@ -474,31 +559,50 @@ const ClassroomJoinCreateForm = ({ myClassrooms, setMyClassrooms, onJoinedClassr
                 fontSize: 22,
                 verticalAlign: "middle"
               }}
-            >📋</button>
+            >
+              📋
+            </button>
           </div>
-          <div style={{ fontSize: 16, color: "#222", fontWeight: 600, marginBottom: 5 }}>
+          <div
+            style={{
+              fontSize: 16,
+              color: "#222",
+              fontWeight: 600,
+              marginBottom: 5
+            }}
+          >
             Share this link:
           </div>
-          <div style={{
-            padding: "7px 9px",
-            borderRadius: 7,
-            background: "#fff",
-            border: `1px dotted ${colorPalette.primary}`,
-            color: colorPalette.primary,
-            margin: "0 0 7px 0",
-            fontWeight: 680,
-            fontSize: 15.5,
-            wordBreak: "break-all"
-          }}
+          <div
+            style={{
+              padding: "7px 9px",
+              borderRadius: 7,
+              background: "#fff",
+              border: `1px dotted ${colorPalette.primary}`,
+              color: colorPalette.primary,
+              margin: "0 0 7px 0",
+              fontWeight: 680,
+              fontSize: 15.5,
+              wordBreak: "break-all"
+            }}
           >
             <a
               href={joinUrl}
               target="_blank"
               rel="noopener noreferrer"
-              style={{ color: colorPalette.primary, textDecoration: "underline", fontWeight: 700, wordBreak: "break-all" }}
-            >{joinUrl}</a>
+              style={{
+                color: colorPalette.primary,
+                textDecoration: "underline",
+                fontWeight: 700,
+                wordBreak: "break-all"
+              }}
+            >
+              {joinUrl}
+            </a>
             <button
-              onClick={() => navigator.clipboard && navigator.clipboard.writeText(joinUrl)}
+              onClick={() =>
+                navigator.clipboard && navigator.clipboard.writeText(joinUrl)
+              }
               title="Copy link"
               style={{
                 marginLeft: 8,
@@ -509,7 +613,9 @@ const ClassroomJoinCreateForm = ({ myClassrooms, setMyClassrooms, onJoinedClassr
                 fontSize: 18,
                 verticalAlign: "middle"
               }}
-            >📋</button>
+            >
+              📋
+            </button>
           </div>
         </div>
         <button
@@ -532,7 +638,9 @@ const ClassroomJoinCreateForm = ({ myClassrooms, setMyClassrooms, onJoinedClassr
             setNewClassroomMembers(null);
             setMembersInput("");
           }}
-        >Create Another</button>
+        >
+          Create Another
+        </button>
       </section>
     );
   }
@@ -553,24 +661,28 @@ const ClassroomJoinCreateForm = ({ myClassrooms, setMyClassrooms, onJoinedClassr
         alignItems: "center"
       }}
     >
-      <h2 style={{
-        marginBottom: 20,
-        color: colorPalette.primary,
-        fontWeight: 800,
-        fontFamily: fontStack,
-        fontSize: "1.53rem",
-        letterSpacing: 0.5
-      }}>
+      <h2
+        style={{
+          marginBottom: 20,
+          color: colorPalette.primary,
+          fontWeight: 800,
+          fontFamily: fontStack,
+          fontSize: "1.53rem",
+          letterSpacing: 0.5
+        }}
+      >
         Join or Create Classroom
       </h2>
-      <div style={{
-        display: "flex",
-        marginBottom: 15,
-        gap: 7,
-        alignItems: "center",
-        justifyContent: "center",
-        width: "100%"
-      }}>
+      <div
+        style={{
+          display: "flex",
+          marginBottom: 15,
+          gap: 7,
+          alignItems: "center",
+          justifyContent: "center",
+          width: "100%"
+        }}
+      >
         <button
           onClick={() => setMode("join")}
           style={{
@@ -586,7 +698,9 @@ const ClassroomJoinCreateForm = ({ myClassrooms, setMyClassrooms, onJoinedClassr
             cursor: "pointer",
             transition: "background 0.14s"
           }}
-        >🔑 Join</button>
+        >
+          🔑 Join
+        </button>
         <button
           onClick={() => setMode("create")}
           style={{
@@ -602,7 +716,9 @@ const ClassroomJoinCreateForm = ({ myClassrooms, setMyClassrooms, onJoinedClassr
             cursor: "pointer",
             transition: "background 0.14s"
           }}
-        >🎉 Create</button>
+        >
+          🎉 Create
+        </button>
       </div>
       {mode === "join" ? (
         <form
@@ -613,7 +729,11 @@ const ClassroomJoinCreateForm = ({ myClassrooms, setMyClassrooms, onJoinedClassr
           <input
             type="text"
             value={joinCodeInput}
-            onChange={e => setJoinCodeInput(e.target.value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase())}
+            onChange={(e) =>
+              setJoinCodeInput(
+                e.target.value.replace(/[^a-zA-Z0-9]/g, "").toUpperCase()
+              )
+            }
             placeholder="Classroom code (e.g. ABC123)"
             required
             maxLength={6}
@@ -650,35 +770,59 @@ const ClassroomJoinCreateForm = ({ myClassrooms, setMyClassrooms, onJoinedClassr
               transition: "background 0.12s, box-shadow 0.13s",
               opacity: joinLoading ? 0.6 : 1
             }}
-            onMouseOver={e => { if (!joinLoading) e.currentTarget.style.background = "#337e7d"; }}
-            onMouseOut={e => { if (!joinLoading) e.currentTarget.style.background = colorPalette.primary; }}
-            onFocus={e => { if (!joinLoading) e.currentTarget.style.background = "#337e7d"; }}
-            onBlur={e => { if (!joinLoading) e.currentTarget.style.background = colorPalette.primary; }}
-          >{joinLoading ? "Checking..." : "Join"}</button>
-
+            onMouseOver={(e) => {
+              if (!joinLoading) e.currentTarget.style.background = "#337e7d";
+            }}
+            onMouseOut={(e) => {
+              if (!joinLoading) e.currentTarget.style.background = colorPalette.primary;
+            }}
+            onFocus={(e) => {
+              if (!joinLoading) e.currentTarget.style.background = "#337e7d";
+            }}
+            onBlur={(e) => {
+              if (!joinLoading) e.currentTarget.style.background = colorPalette.primary;
+            }}
+          >
+            {joinLoading ? "Checking..." : "Join"}
+          </button>
           {joinError && (
-            <div style={{
-              marginTop: 10,
-              color: colorPalette.accent,
-              fontWeight: 700,
-              padding: "8px 0 0 0",
-              minHeight: 24
-            }}>
+            <div
+              style={{
+                marginTop: 10,
+                color: colorPalette.accent,
+                fontWeight: 700,
+                padding: "8px 0 0 0",
+                minHeight: 24
+              }}
+            >
               {joinError}
             </div>
           )}
           {joinSuccessInfo && (
-            <div style={{
-              marginTop: 14,
-              color: colorPalette.primary,
-              fontWeight: 700,
-              background: "#f3fff0",
-              border: `1px solid ${colorPalette.primary}`,
-              borderRadius: 9,
-              padding: "10px 8px"
-            }}>
-              <span>Joined classroom <b>{joinSuccessInfo.code}</b> with {joinSuccessInfo.members} members!
-                <br /><span style={{ fontWeight: 500, color: colorPalette.text, fontSize: 15 }}>Ready to participate.</span>
+            <div
+              style={{
+                marginTop: 14,
+                color: colorPalette.primary,
+                fontWeight: 700,
+                background: "#f3fff0",
+                border: `1px solid ${colorPalette.primary}`,
+                borderRadius: 9,
+                padding: "10px 8px"
+              }}
+            >
+              <span>
+                Joined classroom <b>{joinSuccessInfo.code}</b> with{" "}
+                {joinSuccessInfo.members} members!
+                <br />
+                <span
+                  style={{
+                    fontWeight: 500,
+                    color: colorPalette.text,
+                    fontSize: 15
+                  }}
+                >
+                  Ready to participate.
+                </span>
               </span>
             </div>
           )}
@@ -699,7 +843,9 @@ const ClassroomJoinCreateForm = ({ myClassrooms, setMyClassrooms, onJoinedClassr
                 color: colorPalette.primary,
                 fontSize: 16
               }}
-            >Number of members <span style={{ color: colorPalette.accent }}>*</span></label>
+            >
+              Number of members <span style={{ color: colorPalette.accent }}>*</span>
+            </label>
             <input
               id="number-members"
               type="number"
@@ -707,7 +853,7 @@ const ClassroomJoinCreateForm = ({ myClassrooms, setMyClassrooms, onJoinedClassr
               max={200}
               required
               value={membersInput}
-              onChange={e => {
+              onChange={(e) => {
                 setMembersInput(e.target.value.replace(/[^0-9]/g, ""));
                 setMembersTouched(true);
               }}
@@ -715,22 +861,31 @@ const ClassroomJoinCreateForm = ({ myClassrooms, setMyClassrooms, onJoinedClassr
                 width: "100%",
                 padding: "11px 12px",
                 borderRadius: 12,
-                border: membersTouched && (!membersInput || parseInt(membersInput, 10) < 1)
-                  ? `2px solid ${colorPalette.accent}`
-                  : `1.6px solid ${colorPalette.primary}`,
+                border:
+                  membersTouched &&
+                  (!membersInput || parseInt(membersInput, 10) < 1)
+                    ? `2px solid ${colorPalette.accent}`
+                    : `1.6px solid ${colorPalette.primary}`,
                 fontSize: 17,
                 outline: "none",
                 background: colorPalette.bg,
                 color: colorPalette.text,
-                fontFamily: fontStack,
+                fontFamily: fontStack
               }}
               aria-required="true"
             />
-            {membersTouched && (!membersInput || parseInt(membersInput, 10) < 1) && (
-              <div style={{ color: colorPalette.accent, fontSize: 13, marginTop: 4 }}>
-                Please enter a valid, positive member count.
-              </div>
-            )}
+            {membersTouched &&
+              (!membersInput || parseInt(membersInput, 10) < 1) && (
+                <div
+                  style={{
+                    color: colorPalette.accent,
+                    fontSize: 13,
+                    marginTop: 4
+                  }}
+                >
+                  Please enter a valid, positive member count.
+                </div>
+              )}
           </div>
           <button
             type="submit"
@@ -751,28 +906,30 @@ const ClassroomJoinCreateForm = ({ myClassrooms, setMyClassrooms, onJoinedClassr
               opacity: submitting ? 0.7 : 1,
               transition: "background 0.12s, box-shadow 0.13s"
             }}
-            onMouseOver={e => {
+            onMouseOver={(e) => {
               if (!submitting) e.currentTarget.style.background = "#fa4b6a";
             }}
-            onMouseOut={e => {
+            onMouseOut={(e) => {
               if (!submitting) e.currentTarget.style.background = colorPalette.accent;
             }}
-            onFocus={e => {
+            onFocus={(e) => {
               if (!submitting) e.currentTarget.style.background = "#fa4b6a";
             }}
-            onBlur={e => {
+            onBlur={(e) => {
               if (!submitting) e.currentTarget.style.background = colorPalette.accent;
             }}
           >
             {submitting ? "Creating..." : "Create Classroom"}
           </button>
           {createError && (
-            <div style={{
-              color: colorPalette.accent,
-              fontWeight: 700,
-              padding: "10px 0 0 0",
-              minHeight: 22
-            }}>
+            <div
+              style={{
+                color: colorPalette.accent,
+                fontWeight: 700,
+                padding: "10px 0 0 0",
+                minHeight: 22
+              }}
+            >
               {createError}
             </div>
           )}
@@ -782,9 +939,7 @@ const ClassroomJoinCreateForm = ({ myClassrooms, setMyClassrooms, onJoinedClassr
   );
 };
 
-/**
- * Feature stub cards: Soft backgrounds, playful font, curved cards.
- */
+/** Feature stub cards: unchanged from original code for brevity */
 const stubCard = (color, icon, text) => (
   <div
     style={{
@@ -807,49 +962,68 @@ const stubCard = (color, icon, text) => (
       minHeight: 98
     }}
   >
-    <span style={{
-      fontSize: "1.7em",
-      marginBottom: 3,
-      filter: "drop-shadow(0 1px 2px #fdf5ff)"
-    }}>{icon}</span>
-    <span>
-      {text}
+    <span
+      style={{
+        fontSize: "1.7em",
+        marginBottom: 3,
+        filter: "drop-shadow(0 1px 2px #fdf5ff)"
+      }}
+    >
+      {icon}
     </span>
+    <span>{text}</span>
   </div>
 );
 
-const ChatFeatureStub = () => stubCard(
-  colorPalette.highlight,
-  "💬",
-  <>Public Chat coming soon! <span style={{ color: colorPalette.primary, fontWeight: 800 }}>Excited?</span></>
-);
+const ChatFeatureStub = () =>
+  stubCard(
+    colorPalette.highlight,
+    "💬",
+    <>
+      Public Chat coming soon!{" "}
+      <span style={{ color: colorPalette.primary, fontWeight: 800 }}>
+        Excited?
+      </span>
+    </>
+  );
 
-const BulletinBoardStub = () => stubCard(
-  colorPalette.cardAlt,
-  "📌",
-  <>Bulletin Board for reminders coming soon!</>
-);
+const BulletinBoardStub = () =>
+  stubCard(
+    colorPalette.cardAlt,
+    "📌",
+    <>Bulletin Board for reminders coming soon!</>
+  );
 
-const NotebookStub = () => stubCard(
-  colorPalette.secondary,
-  "📒",
-  <>Collaborative Notebook (stub)<br />Let ideas fly!</>
-);
+const NotebookStub = () =>
+  stubCard(
+    colorPalette.secondary,
+    "📒",
+    <>
+      Collaborative Notebook (stub)
+      <br />
+      Let ideas fly!
+    </>
+  );
 
-const GroupProjectsStub = () => stubCard(
-  "#E1F9F2",
-  "🧑‍🤝‍🧑",
-  <>Group Projects feature coming soon!</>
-);
+const GroupProjectsStub = () =>
+  stubCard(
+    "#E1F9F2",
+    "🧑‍🤝‍🧑",
+    <>Group Projects feature coming soon!</>
+  );
 
-const AudioVideoCallsStub = () => stubCard(
-  "#FFF1F8",
-  "🎤",
-  <>Audio/Video Calls (stub) <br />Connect soon!</>
-);
+const AudioVideoCallsStub = () =>
+  stubCard(
+    "#FFF1F8",
+    "🎤",
+    <>
+      Audio/Video Calls (stub) <br />
+      Connect soon!
+    </>
+  );
 
 /**
- * ClassroomView: Playful tabs, curved card, soft section, lively behavior.
+ * ClassroomView: unchanged, playful tabs with feature stubs.
  */
 const ClassroomView = () => {
   const [tab, setTab] = useState("chat");
@@ -859,17 +1033,28 @@ const ClassroomView = () => {
     { key: "bulletin", label: "Bulletin Board 📌" },
     { key: "notebook", label: "Notebook 📒" },
     { key: "groups", label: "Group Projects 🧑‍🤝‍🧑" },
-    { key: "calls", label: "Calls 🎤" },
+    { key: "calls", label: "Calls 🎤" }
   ];
 
   let content = null;
   switch (tab) {
-    case "chat": content = <ChatFeatureStub />; break;
-    case "bulletin": content = <BulletinBoardStub />; break;
-    case "notebook": content = <NotebookStub />; break;
-    case "groups": content = <GroupProjectsStub />; break;
-    case "calls": content = <AudioVideoCallsStub />; break;
-    default: content = null;
+    case "chat":
+      content = <ChatFeatureStub />;
+      break;
+    case "bulletin":
+      content = <BulletinBoardStub />;
+      break;
+    case "notebook":
+      content = <NotebookStub />;
+      break;
+    case "groups":
+      content = <GroupProjectsStub />;
+      break;
+    case "calls":
+      content = <AudioVideoCallsStub />;
+      break;
+    default:
+      content = null;
   }
 
   return (
@@ -894,11 +1079,14 @@ const ClassroomView = () => {
           justifyContent: "center"
         }}
       >
-        {tabMeta.map(tabEntry => (
+        {tabMeta.map((tabEntry) => (
           <button
             key={tabEntry.key}
             style={{
-              background: tab === tabEntry.key ? colorPalette.primary : colorPalette.secondary,
+              background:
+                tab === tabEntry.key
+                  ? colorPalette.primary
+                  : colorPalette.secondary,
               color: tab === tabEntry.key ? "#fff" : colorPalette.primary,
               border: "none",
               borderRadius: 40,
@@ -909,20 +1097,21 @@ const ClassroomView = () => {
               fontFamily: fontStack,
               outline: "none",
               transition: "all 0.11s",
-              boxShadow: tab === tabEntry.key
-                ? "0 3px 14px #dfeffc"
-                : "0 1px 2.5px #ffefd1",
+              boxShadow:
+                tab === tabEntry.key
+                  ? "0 3px 14px #dfeffc"
+                  : "0 1px 2.5px #ffefd1",
               letterSpacing: 0.1,
               opacity: tab === tabEntry.key ? 1.0 : 0.84
             }}
             onClick={() => setTab(tabEntry.key)}
-            onMouseOver={e => {
+            onMouseOver={(e) => {
               if (tab !== tabEntry.key) {
                 e.currentTarget.style.background = "#ffe37a";
                 e.currentTarget.style.color = colorPalette.primary;
               }
             }}
-            onMouseOut={e => {
+            onMouseOut={(e) => {
               if (tab !== tabEntry.key) {
                 e.currentTarget.style.background = colorPalette.secondary;
                 e.currentTarget.style.color = colorPalette.primary;
@@ -941,22 +1130,17 @@ const ClassroomView = () => {
 };
 
 /**
- * Main playful app UI chrome - prominent header, logo, background, nav.
- */
-/**
  * PUBLIC_INTERFACE
- * Main Container controls classrooms list and passes as props.
+ * Main Container: holds classrooms list state, passes it down, and updates on join.
  */
 export const ClassroomConnectMainContainer = () => {
   const [mainView, setMainView] = useState("dashboard");
   const [myClassrooms, setMyClassrooms] = useState(getAllMyClassroomsFromStorage());
 
-  // Navigate to join/create when dashboard calls
   const goToJoinCreate = () => setMainView("joinCreate");
 
-  // Handle new class joined, useful for future features (notified on successful join)
   const handleJoinedClassroom = (classroom) => {
-    // State will be updated by storage helper and setMyClassrooms, but this can be expanded if needed.
+    // This can be hooked for notifications or to open classroom
   };
 
   return (
@@ -966,7 +1150,7 @@ export const ClassroomConnectMainContainer = () => {
         background: `linear-gradient(-4deg, #f9fafb 60%, #fbd46d17 100%), ${colorPalette.bg}`,
         fontFamily: fontStack,
         display: "flex",
-        flexDirection: "column",
+        flexDirection: "column"
       }}
     >
       {/* Playful Navbar */}
@@ -1011,7 +1195,6 @@ export const ClassroomConnectMainContainer = () => {
               textShadow: "0 1.5px 3px #a6e8ed70"
             }}
           >
-            {/* Friendly notebook logo (SVG) */}
             <span
               style={{
                 background: colorPalette.secondary,
@@ -1042,25 +1225,76 @@ export const ClassroomConnectMainContainer = () => {
                 xmlns="http://www.w3.org/2000/svg"
                 aria-label="Notebook"
               >
-                <rect x="6" y="5" width="18" height="22" rx="5" fill="#fffbea" stroke="#4F8A8B" strokeWidth="2" />
-                <rect x="8.5" y="7.5" width="13" height="2.5" rx="1.2" fill="#FBD46D" />
-                <rect x="8.5" y="14.5" width="13" height="1.5" rx="0.75" fill="#FFD780" />
-                <rect x="8.5" y="18.5" width="13" height="1.2" rx="0.6" fill="#FFD780" />
-                <rect x="8.5" y="22.5" width="8.5" height="1.2" rx="0.6" fill="#FFD780" />
+                <rect
+                  x="6"
+                  y="5"
+                  width="18"
+                  height="22"
+                  rx="5"
+                  fill="#fffbea"
+                  stroke="#4F8A8B"
+                  strokeWidth="2"
+                />
+                <rect
+                  x="8.5"
+                  y="7.5"
+                  width="13"
+                  height="2.5"
+                  rx="1.2"
+                  fill="#FBD46D"
+                />
+                <rect
+                  x="8.5"
+                  y="14.5"
+                  width="13"
+                  height="1.5"
+                  rx="0.75"
+                  fill="#FFD780"
+                />
+                <rect
+                  x="8.5"
+                  y="18.5"
+                  width="13"
+                  height="1.2"
+                  rx="0.6"
+                  fill="#FFD780"
+                />
+                <rect
+                  x="8.5"
+                  y="22.5"
+                  width="8.5"
+                  height="1.2"
+                  rx="0.6"
+                  fill="#FFD780"
+                />
                 <circle cx="8.8" cy="9.1" r="0.95" fill="#F67280" />
                 <circle cx="8.8" cy="15.2" r="0.7" fill="#F67280" />
                 <circle cx="8.8" cy="19.2" r="0.7" fill="#F67280" />
                 <circle cx="8.8" cy="23.2" r="0.7" fill="#F67280" />
               </svg>
             </span>
-            <span style={{ color: "#fff", fontWeight: 900, fontFamily: fontStack }}>Classroom Connect</span>
+            <span
+              style={{
+                color: "#fff",
+                fontWeight: 900,
+                fontFamily: fontStack
+              }}
+            >
+              Classroom Connect
+            </span>
           </div>
           <div style={{ display: "flex", gap: 12, fontFamily: fontStack }}>
             <button
               onClick={() => setMainView("dashboard")}
               style={{
-                background: mainView === "dashboard" ? colorPalette.secondary : "rgba(255,255,255,0.07)",
-                color: mainView === "dashboard" ? colorPalette.primary : "#fff",
+                background:
+                  mainView === "dashboard"
+                    ? colorPalette.secondary
+                    : "rgba(255,255,255,0.07)",
+                color:
+                  mainView === "dashboard"
+                    ? colorPalette.primary
+                    : "#fff",
                 fontWeight: 800,
                 borderRadius: 18,
                 border: "none",
@@ -1071,20 +1305,22 @@ export const ClassroomConnectMainContainer = () => {
                 cursor: "pointer",
                 marginLeft: 2,
                 marginRight: 2,
-                boxShadow: mainView === "dashboard"
-                  ? "0 2px 8px #f8e7b4"
-                  : "0 0.5px 2px #97e5e341",
+                boxShadow:
+                  mainView === "dashboard"
+                    ? "0 2px 8px #f8e7b4"
+                    : "0 0.5px 2px #97e5e341",
                 transition: "all 0.14s"
               }}
-              onMouseOver={e => {
+              onMouseOver={(e) => {
                 if (mainView !== "dashboard") {
                   e.currentTarget.style.background = "#ffe37a";
                   e.currentTarget.style.color = colorPalette.primary;
                 }
               }}
-              onMouseOut={e => {
+              onMouseOut={(e) => {
                 if (mainView !== "dashboard") {
-                  e.currentTarget.style.background = "rgba(255,255,255,0.07)";
+                  e.currentTarget.style.background =
+                    "rgba(255,255,255,0.07)";
                   e.currentTarget.style.color = "#fff";
                 }
               }}
@@ -1096,8 +1332,14 @@ export const ClassroomConnectMainContainer = () => {
             <button
               onClick={() => setMainView("joinCreate")}
               style={{
-                background: mainView === "joinCreate" ? colorPalette.secondary : "rgba(255,255,255,0.07)",
-                color: mainView === "joinCreate" ? colorPalette.primary : "#fff",
+                background:
+                  mainView === "joinCreate"
+                    ? colorPalette.secondary
+                    : "rgba(255,255,255,0.07)",
+                color:
+                  mainView === "joinCreate"
+                    ? colorPalette.primary
+                    : "#fff",
                 fontWeight: 800,
                 borderRadius: 18,
                 border: "none",
@@ -1108,20 +1350,22 @@ export const ClassroomConnectMainContainer = () => {
                 cursor: "pointer",
                 marginLeft: 2,
                 marginRight: 2,
-                boxShadow: mainView === "joinCreate"
-                  ? "0 2px 8px #f8e7b4"
-                  : "0 0.5px 2px #97e5e341",
+                boxShadow:
+                  mainView === "joinCreate"
+                    ? "0 2px 8px #f8e7b4"
+                    : "0 0.5px 2px #97e5e341",
                 transition: "all 0.14s"
               }}
-              onMouseOver={e => {
+              onMouseOver={(e) => {
                 if (mainView !== "joinCreate") {
                   e.currentTarget.style.background = "#ffe37a";
                   e.currentTarget.style.color = colorPalette.primary;
                 }
               }}
-              onMouseOut={e => {
+              onMouseOut={(e) => {
                 if (mainView !== "joinCreate") {
-                  e.currentTarget.style.background = "rgba(255,255,255,0.07)";
+                  e.currentTarget.style.background =
+                    "rgba(255,255,255,0.07)";
                   e.currentTarget.style.color = "#fff";
                 }
               }}
@@ -1145,8 +1389,21 @@ export const ClassroomConnectMainContainer = () => {
           fontFamily: fontStack
         }}
       >
-        {mainView === "dashboard" && <Dashboard onGoToJoinCreate={goToJoinCreate} />}
-        {mainView === "joinCreate" && <ClassroomJoinCreateForm />}
+        {mainView === "dashboard" && (
+          <Dashboard
+            myClassrooms={myClassrooms}
+            setMyClassrooms={setMyClassrooms}
+            onGoToJoinCreate={goToJoinCreate}
+          />
+        )}
+        {mainView === "joinCreate" && (
+          <ClassroomJoinCreateForm
+            myClassrooms={myClassrooms}
+            setMyClassrooms={setMyClassrooms}
+            onJoinedClassroom={handleJoinedClassroom}
+            setMainView={setMainView}
+          />
+        )}
         {mainView === "classroom" && <ClassroomView />}
       </main>
       <footer

@@ -70,8 +70,15 @@ function addClassroomToStorage(classroom, updateListState) {
   if (typeof updateListState === "function") updateListState([...list]);
 }
 
-// Dashboard lists classrooms and triggers updates when list/state changes.
-const Dashboard = ({ myClassrooms, setMyClassrooms, onGoToJoinCreate }) => {
+/*
+ * Dashboard now accepts onEnterClassroom to trigger navigation.
+ */
+const Dashboard = ({
+  myClassrooms,
+  setMyClassrooms,
+  onGoToJoinCreate,
+  onEnterClassroom,
+}) => {
   // Re-sync from storage on dashboard mount and when tab regains focus
   React.useEffect(() => {
     const refresh = () => setMyClassrooms(getAllMyClassroomsFromStorage());
@@ -84,13 +91,18 @@ const Dashboard = ({ myClassrooms, setMyClassrooms, onGoToJoinCreate }) => {
     if (typeof onGoToJoinCreate === "function") onGoToJoinCreate();
   };
 
+  // New: When class card is clicked, go to classroom
+  const handleEnterClassroom = (classroom) => {
+    if (typeof onEnterClassroom === "function") onEnterClassroom(classroom);
+  };
+
   return (
     <section
       style={{
         textAlign: "center",
         marginTop: 60,
         fontFamily: fontStack,
-        background: "transparent"
+        background: "transparent",
       }}
     >
       <h2
@@ -100,7 +112,7 @@ const Dashboard = ({ myClassrooms, setMyClassrooms, onGoToJoinCreate }) => {
           fontWeight: 900,
           fontFamily: fontStack,
           fontSize: "2.1rem",
-          letterSpacing: 1
+          letterSpacing: 1,
         }}
       >
         Your Classrooms
@@ -113,7 +125,7 @@ const Dashboard = ({ myClassrooms, setMyClassrooms, onGoToJoinCreate }) => {
               fontWeight: 500,
               marginBottom: 25,
               letterSpacing: 0.15,
-              fontSize: 17
+              fontSize: 17,
             }}
           >
             Here's a list of classrooms you've joined!
@@ -125,7 +137,7 @@ const Dashboard = ({ myClassrooms, setMyClassrooms, onGoToJoinCreate }) => {
               gap: "2.2rem",
               justifyContent: "center",
               flexWrap: "wrap",
-              background: "transparent"
+              background: "transparent",
             }}
           >
             {myClassrooms.map((classroom, idx) => (
@@ -146,7 +158,7 @@ const Dashboard = ({ myClassrooms, setMyClassrooms, onGoToJoinCreate }) => {
                   transition: "transform 0.14s, box-shadow 0.15s",
                   cursor: "pointer",
                   fontSize: "1.15rem",
-                  position: "relative"
+                  position: "relative",
                 }}
                 tabIndex={0}
                 onMouseOver={(e) => {
@@ -167,6 +179,12 @@ const Dashboard = ({ myClassrooms, setMyClassrooms, onGoToJoinCreate }) => {
                 }}
                 aria-label={`Classroom ${classroom.code}`}
                 title={`Classroom Code: ${classroom.code}${classroom.members ? ` (${classroom.members} members)` : ""}`}
+                onClick={() => handleEnterClassroom(classroom)}
+                onKeyPress={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    handleEnterClassroom(classroom);
+                  }
+                }}
               >
                 <span
                   role="img"
@@ -183,7 +201,7 @@ const Dashboard = ({ myClassrooms, setMyClassrooms, onGoToJoinCreate }) => {
                         color: colorPalette.accent,
                         marginLeft: 5,
                         fontWeight: 600,
-                        fontSize: 15
+                        fontSize: 15,
                       }}
                     >
                       ({classroom.members})
@@ -207,9 +225,10 @@ const Dashboard = ({ myClassrooms, setMyClassrooms, onGoToJoinCreate }) => {
                 fontSize: "1.12rem",
                 boxShadow: colorPalette.shadow,
                 cursor: "pointer",
-                transition: "transform 0.14s, box-shadow 0.15s, background 0.13s",
+                transition:
+                  "transform 0.14s, box-shadow 0.15s, background 0.13s",
                 outline: "none",
-                position: "relative"
+                position: "relative",
               }}
               tabIndex={0}
               aria-label="Add Classroom"
@@ -236,7 +255,7 @@ const Dashboard = ({ myClassrooms, setMyClassrooms, onGoToJoinCreate }) => {
                   marginRight: 13,
                   fontSize: "1.6em",
                   display: "inline-block",
-                  filter: "drop-shadow(0 2px 5px #ffd7e1)"
+                  filter: "drop-shadow(0 2px 5px #ffd7e1)",
                 }}
                 role="img"
                 aria-label="add"
@@ -253,7 +272,7 @@ const Dashboard = ({ myClassrooms, setMyClassrooms, onGoToJoinCreate }) => {
             margin: "2.2rem auto 2.6rem",
             display: "flex",
             flexDirection: "column",
-            alignItems: "center"
+            alignItems: "center",
           }}
         >
           <p
@@ -261,7 +280,7 @@ const Dashboard = ({ myClassrooms, setMyClassrooms, onGoToJoinCreate }) => {
               fontSize: 19,
               color: colorPalette.text,
               fontWeight: 700,
-              marginBottom: 23
+              marginBottom: 23,
             }}
           >
             You're not in any classrooms yet!
@@ -280,7 +299,7 @@ const Dashboard = ({ myClassrooms, setMyClassrooms, onGoToJoinCreate }) => {
               cursor: "pointer",
               margin: "0 auto",
               marginBottom: 9,
-              transition: "background 0.15s"
+              transition: "background 0.15s",
             }}
             onClick={handleAddClassroom}
             onMouseOver={(e) => {
@@ -306,7 +325,7 @@ const Dashboard = ({ myClassrooms, setMyClassrooms, onGoToJoinCreate }) => {
               fontWeight: 500,
               fontSize: 15.5,
               marginTop: 7,
-              opacity: 0.83
+              opacity: 0.83,
             }}
           >
             Once you join, your classrooms will show here!

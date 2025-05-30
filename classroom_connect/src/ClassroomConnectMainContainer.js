@@ -1,14 +1,20 @@
 import React, { useState } from "react";
 
-// Colors and theme (could be migrated to a CSS/SCSS file)
+// Colors and theme for playful, inviting, light-student style
 const colorPalette = {
   primary: "#4F8A8B",
   secondary: "#FBD46D",
   accent: "#F67280",
-  bg: "#FCFCFC",
-  text: "#222",
-  nav: "#F6F7FA",
+  bg: "#FAFAFE",
+  card: "#FFFDF9",
+  cardAlt: "#FFF3F6",
+  highlight: "#edfaff",
+  text: "#242F32",
+  nav: "#FFF9F0",
+  shadow: "0 4px 22px 0 rgba(79, 138, 139, 0.07), 0 1.5px 8px 0 #fadfa6"
 };
+
+const fontStack = `'Nunito', 'Quicksand', 'Inter', 'Roboto', 'Helvetica Neue', Arial, sans-serif`;
 
 // Dashboard stub - will eventually list joined classrooms
 const Dashboard = () => (

@@ -151,53 +151,93 @@ const Dashboard = () => (
   </section>
 );
 
-// Classroom joining/creation form stub
+// Classroom joining/creation form, cheerful card-like design
 const ClassroomJoinCreateForm = () => (
-  <section style={{
-    margin: "3rem auto",
-    background: "#FFF",
-    padding: 32,
-    borderRadius: 18,
-    maxWidth: 350,
-    boxShadow: "0 2px 24px #e8e8e8"
-  }}>
-    <h2 style={{ marginBottom: 20, color: colorPalette.primary }}>
+  <section
+    style={{
+      margin: "3.3rem auto",
+      background: colorPalette.card,
+      padding: 36,
+      borderRadius: 22,
+      maxWidth: 350,
+      minWidth: 260,
+      fontFamily: fontStack,
+      boxShadow: colorPalette.shadow,
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center"
+    }}
+  >
+    <h2 style={{
+      marginBottom: 20,
+      color: colorPalette.primary,
+      fontWeight: 800,
+      fontFamily: fontStack,
+      fontSize: "1.53rem",
+      letterSpacing: 0.5
+    }}>
       Join or Create Classroom
     </h2>
     <input
       type="text"
-      placeholder="Enter classroom code"
+      placeholder="🔑 Enter classroom code"
       style={{
-        width: "100%",
-        padding: 12,
-        borderRadius: 10,
-        border: `1.5px solid ${colorPalette.primary}`,
-        fontSize: 17,
-        marginBottom: 14,
-        outline: "none"
+        width: "99%",
+        padding: "13px 12px",
+        borderRadius: 13,
+        border: `1.6px solid ${colorPalette.primary}`,
+        fontSize: 18,
+        marginBottom: 18,
+        outline: "none",
+        fontFamily: fontStack,
+        background: colorPalette.bg,
+        color: colorPalette.text,
+        boxShadow: "0 1.5px 6px #f6f6f7"
       }}
     />
-    <div style={{ display: "flex", gap: 12 }}>
-      <button style={{
-        flex: 1,
-        background: colorPalette.primary,
-        color: "#fff",
-        fontWeight: 600,
-        borderRadius: 10,
-        padding: "10px 0",
-        border: "none",
-        cursor: "pointer"
-      }}>Join</button>
-      <button style={{
-        flex: 1,
-        background: colorPalette.accent,
-        color: "#fff",
-        fontWeight: 600,
-        borderRadius: 10,
-        padding: "10px 0",
-        border: "none",
-        cursor: "pointer"
-      }}>Create</button>
+    <div style={{ display: "flex", gap: 12, justifyContent: "center", width: "100%" }}>
+      <button
+        style={{
+          flex: 1,
+          background: colorPalette.primary,
+          color: "#fff",
+          fontWeight: 700,
+          borderRadius: 13,
+          padding: "11px 0",
+          border: "none",
+          outline: "none",
+          cursor: "pointer",
+          fontSize: 17,
+          fontFamily: fontStack,
+          transition: "background 0.12s, box-shadow 0.13s"
+        }}
+        onMouseOver={e => { e.currentTarget.style.background = "#337e7d"; }}
+        onMouseOut={e => { e.currentTarget.style.background = colorPalette.primary; }}
+        onFocus={e => { e.currentTarget.style.background = "#337e7d"; }}
+        onBlur={e => { e.currentTarget.style.background = colorPalette.primary; }}
+      >Join
+      </button>
+      <button
+        style={{
+          flex: 1,
+          background: colorPalette.accent,
+          color: "#fff",
+          fontWeight: 700,
+          borderRadius: 13,
+          padding: "11px 0",
+          border: "none",
+          outline: "none",
+          cursor: "pointer",
+          fontSize: 17,
+          fontFamily: fontStack,
+          transition: "background 0.12s, box-shadow 0.13s"
+        }}
+        onMouseOver={e => { e.currentTarget.style.background = "#fa4b6a"; }}
+        onMouseOut={e => { e.currentTarget.style.background = colorPalette.accent; }}
+        onFocus={e => { e.currentTarget.style.background = "#fa4b6a"; }}
+        onBlur={e => { e.currentTarget.style.background = colorPalette.accent; }}
+      >Create
+      </button>
     </div>
   </section>
 );

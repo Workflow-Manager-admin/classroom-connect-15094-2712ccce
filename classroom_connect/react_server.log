@@ -18,3 +18,11 @@ Note that the development build is not optimized.
 To create a production build, use npm run build.
 
 webpack compiled successfully
+Compiling...
+Failed to compile.
+
+Module not found: Error: Can't resolve './ClassroomConnectMainContainer' in '/home/kavia/workspace/code-generation/classroom-connect-15094-2712ccce/classroom_connect/src'
+ERROR in ./src/index.js 7:0-80
+Module not found: Error: Can't resolve './ClassroomConnectMainContainer' in '/home/kavia/workspace/code-generation/classroom-connect-15094-2712ccce/classroom_connect/src'
+
+webpack compiled with 1 error

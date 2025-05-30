@@ -958,12 +958,14 @@ const ClassroomJoinCreateForm = ({
   );
 };
 
-/** Feature stub cards: unchanged from original code for brevity */
+/**
+ * Feature card utility (for stubs and playful containers)
+ */
 const stubCard = (color, icon, text) => (
   <div
     style={{
-      margin: "12px auto",
-      padding: "36px 0 34px 0",
+      margin: "16px auto",
+      padding: "34px 0 30px 0",
       width: "97%",
       background: color,
       borderRadius: 18,
@@ -978,13 +980,14 @@ const stubCard = (color, icon, text) => (
       alignItems: "center",
       justifyContent: "center",
       letterSpacing: 0.03,
-      minHeight: 98
+      minHeight: 98,
+      transition: "box-shadow 0.12s"
     }}
   >
     <span
       style={{
         fontSize: "1.7em",
-        marginBottom: 3,
+        marginBottom: 8,
         filter: "drop-shadow(0 1px 2px #fdf5ff)"
       }}
     >
@@ -994,83 +997,388 @@ const stubCard = (color, icon, text) => (
   </div>
 );
 
-const ChatFeatureStub = () =>
-  stubCard(
-    colorPalette.highlight,
-    "💬",
-    <>
-      Public Chat coming soon!{" "}
-      <span style={{ color: colorPalette.primary, fontWeight: 800 }}>
-        Excited?
-      </span>
-    </>
-  );
+/* ---- Chat Tab Stub ---- */
+const ClassroomChatStub = () => (
+  <div
+    style={{
+      padding: 0,
+      margin: 0,
+      width: "100%",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center"
+    }}
+  >
+    {stubCard(
+      colorPalette.highlight,
+      "💬",
+      <>
+        <div style={{ marginBottom: 12 }}>
+          <span style={{ fontWeight: 800, color: colorPalette.primary }}>
+            General In-Class Chat
+          </span>
+        </div>
+        <div style={{
+          width: "90%",
+          margin: "10px auto",
+          background: "#f6ffff",
+          borderRadius: 12,
+          border: `1px dashed ${colorPalette.primary}`,
+          padding: 18,
+          minHeight: 60,
+          textAlign: "left",
+          color: "#348080",
+          fontSize: 15.2
+        }}>
+          {/* Message list placeholder */}
+          <div style={{ color: "#94a9a9" }}>
+            <b>No messages yet!</b>
+            <br />
+            When someone says hi, messages will appear here.
+          </div>
+        </div>
+        <form style={{ width: "88%", margin: "0 auto", marginTop: 15, display: "flex", gap: 8 }}>
+          <input
+            type="text"
+            style={{
+              flex: 1,
+              borderRadius: 10,
+              border: `1px solid ${colorPalette.primary}`,
+              padding: "9px 12px",
+              fontSize: 15.5,
+              fontFamily: fontStack,
+              background: "#fffefb",
+              color: "#115",
+              outline: "none"
+            }}
+            placeholder="Type a message (stubbed, not sent)…"
+            disabled
+          />
+          <button
+            style={{
+              background: colorPalette.primary,
+              color: "#fff",
+              border: "none",
+              borderRadius: 10,
+              fontWeight: 700,
+              fontSize: 16,
+              fontFamily: fontStack,
+              padding: "8px 24px",
+              cursor: "not-allowed",
+              boxShadow: colorPalette.shadow
+            }}
+            type="button"
+            disabled
+            aria-label="Send disabled"
+          >
+            Send
+          </button>
+        </form>
+      </>
+    )}
+  </div>
+);
 
-const BulletinBoardStub = () =>
-  stubCard(
-    colorPalette.cardAlt,
-    "📌",
-    <>Bulletin Board for reminders coming soon!</>
-  );
+/* ---- Bulletin Board Tab Stub ---- */
+const ClassroomBulletinStub = () => (
+  <div style={{ width: "100%", margin: 0, padding: 0, display: "flex", flexDirection: "column", alignItems: "center" }}>
+    {stubCard(
+      colorPalette.cardAlt,
+      "📌",
+      <div style={{ width: "98%", margin: 0, textAlign: "left" }}>
+        <div style={{ marginBottom: 8, color: colorPalette.primary, fontWeight: 800 }}>
+          Bulletin Board <span style={{ color: colorPalette.accent }}>(stub)</span>
+        </div>
+        <div
+          style={{
+            margin: "8px auto 14px auto",
+            background: "#fffdfa",
+            borderRadius: 12,
+            border: "1px solid #ffdca2",
+            boxShadow: "0 1px 6px #ffeccb",
+            padding: 14,
+            color: "#6a5346",
+            fontSize: 16.2
+          }}
+        >
+          <ul style={{ padding: "0 0 0 20px", margin: 0 }}>
+            <li style={{ marginBottom: 8 }}>
+              Sample Announcement:{" "}
+              <b style={{ color: "#F8AC6B" }}>Project presentations are Friday!</b>
+              <div>
+                <button style={{
+                  background: colorPalette.secondary, border: "none", color: colorPalette.primary,
+                  fontWeight: 700, borderRadius: 7, padding: "2px 10px", fontSize: 13, marginRight: 8, cursor: "not-allowed"
+                }} title="Edit (stub)" disabled>Edit</button>
+                <button style={{
+                  background: colorPalette.accent, border: "none", color: "#fff",
+                  fontWeight: 700, borderRadius: 7, padding: "2px 10px", fontSize: 13, cursor: "not-allowed"
+                }} title="Delete (stub)" disabled>Delete</button>
+              </div>
+            </li>
+            <li>
+              Reminder: <span style={{ color: "#eed77b", fontWeight: 600 }}>Field trip forms due tomorrow.</span>
+              <div>
+                <button style={{
+                  background: colorPalette.secondary, border: "none", color: colorPalette.primary,
+                  fontWeight: 700, borderRadius: 7, padding: "2px 10px", fontSize: 13, marginRight: 8, cursor: "not-allowed"
+                }} title="Edit (stub)" disabled>Edit</button>
+                <button style={{
+                  background: colorPalette.accent, border: "none", color: "#fff",
+                  fontWeight: 700, borderRadius: 7, padding: "2px 10px", fontSize: 13, cursor: "not-allowed"
+                }} title="Delete (stub)" disabled>Delete</button>
+              </div>
+            </li>
+          </ul>
+        </div>
+        <div
+          style={{
+            marginTop: 16,
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            opacity: 0.75
+          }}
+        >
+          <input
+            placeholder="Write an announcement… (stub)"
+            style={{
+              borderRadius: 10,
+              border: `1px solid ${colorPalette.primary}`,
+              fontSize: 15,
+              padding: "8px 11px",
+              fontFamily: fontStack,
+              minWidth: 0,
+              width: 220,
+              outline: "none"
+            }}
+            disabled
+          />
+          <button
+            style={{
+              background: colorPalette.primary,
+              color: "#fff",
+              border: "none",
+              borderRadius: 7,
+              fontWeight: 700,
+              fontSize: 16,
+              padding: "7px 16px",
+              cursor: "not-allowed"
+            }}
+            type="button"
+            disabled
+          >
+            Post
+          </button>
+        </div>
+      </div>
+    )}
+  </div>
+);
 
-const NotebookStub = () =>
-  stubCard(
-    colorPalette.secondary,
-    "📒",
-    <>
-      Collaborative Notebook (stub)
-      <br />
-      Let ideas fly!
-    </>
-  );
+/* ---- Notebook Tab Stub (PDF) ---- */
+const ClassroomNotebookStub = () => (
+  <div style={{ width: "100%", display: "flex", flexDirection: "column", alignItems: "center" }}>
+    {stubCard(
+      colorPalette.secondary,
+      "📒",
+      <>
+        <div style={{ marginBottom: 11, color: colorPalette.primary, fontWeight: 800 }}>Classroom Notebook <span style={{ color: colorPalette.accent, fontWeight: 700 }}>(stub)</span></div>
+        <div style={{
+          border: "1.5px dotted #ffb966",
+          borderRadius: 11,
+          padding: 20,
+          background: "#fffbeb",
+          color: "#7D6B4A",
+          margin: "6px auto 12px",
+          width: "92%",
+          minHeight: 80,
+          fontSize: 15.7
+        }}>
+          No notes yet. You can upload PDFs and everyone can view them. (Feature coming soon!)
+          <br />
+          <span style={{ fontSize: 21, color: "#ddb644" }}>📄</span>
+          <span style={{ color: "#a5904b", fontSize: 14, fontWeight: 600 }}>
+            (PDF Upload/Display Stub)
+          </span>
+        </div>
+        <div style={{ marginTop: 7 }}>
+          <input
+            type="file"
+            accept="application/pdf"
+            style={{ display: "inline-block", fontFamily: fontStack }}
+            disabled
+            aria-label="PDF upload disabled"
+          />
+          <button
+            style={{
+              background: colorPalette.primary,
+              color: "#fff",
+              border: "none",
+              borderRadius: 8,
+              fontWeight: 700,
+              fontSize: 15.5,
+              padding: "8px 18px",
+              marginLeft: 10,
+              cursor: "not-allowed"
+            }}
+            type="button"
+            disabled
+          >
+            Upload
+          </button>
+        </div>
+      </>
+    )}
+  </div>
+);
 
-const GroupProjectsStub = () =>
-  stubCard(
-    "#E1F9F2",
-    "🧑‍🤝‍🧑",
-    <>Group Projects feature coming soon!</>
-  );
-
-const AudioVideoCallsStub = () =>
-  stubCard(
-    "#FFF1F8",
-    "🎤",
-    <>
-      Audio/Video Calls (stub) <br />
-      Connect soon!
-    </>
-  );
+/* ---- Services Tab: Group Projects & Calls (add placeholders) ---- */
+const ClassroomServicesStub = () => (
+  <div style={{
+      display: "flex",
+      flexWrap: "wrap",
+      gap: 24,
+      justifyContent: "center",
+      width: "99%",
+      margin: "0 auto"
+    }}>
+    {/* Group Projects Card */}
+    <div style={{
+      background: "#E1F9F2",
+      borderRadius: 18,
+      minWidth: 280,
+      minHeight: 175,
+      boxShadow: colorPalette.shadow,
+      padding: "34px 16px 24px 16px",
+      margin: "7px 0 7px 0",
+      fontFamily: fontStack,
+      color: "#348080",
+      fontWeight: 700,
+      textAlign: "center",
+      display: "flex",
+      flexDirection: "column",
+      justifyContent: "space-between",
+      alignItems: "center",
+      position: "relative"
+    }}>
+      <div style={{ fontSize: "2.0em", marginBottom: 7, lineHeight: 1 }}>🧑‍🤝‍🧑</div>
+      <div style={{ fontSize: 18.5, color: "#229684", fontWeight: 900, marginBottom: 11 }}>
+        Group Projects
+      </div>
+      <div style={{ fontSize: 14.5, color: "#358e80", marginBottom: 8 }}>
+        Form teams, assign tasks, and track progress. <br />
+        <span style={{ color: colorPalette.secondary, fontWeight: 600 }}>
+          (Feature coming soon)
+        </span>
+      </div>
+      <button
+        style={{
+          background: "#a2e6d7",
+          color: "#115950",
+          borderRadius: 38,
+          border: "none",
+          fontWeight: 700,
+          fontSize: 20,
+          padding: "7px 19px",
+          marginTop: 10,
+          boxShadow: "0 1.5px 7px #b0fff1",
+          cursor: "not-allowed",
+          display: "flex",
+          alignItems: "center"
+        }}
+        type="button"
+        disabled
+        aria-label="Add Group Project (stub)"
+        title="Add Group Project (coming soon)"
+      >
+        <span style={{ fontSize: 22, marginRight: 8 }}>➕</span>
+        Add Project
+      </button>
+    </div>
+    {/* Audio/Video Calls Card */}
+    <div style={{
+      background: "#FFF1F8",
+      borderRadius: 18,
+      minWidth: 280,
+      minHeight: 175,
+      boxShadow: colorPalette.shadow,
+      padding: "34px 16px 24px 16px",
+      margin: "7px 0 7px 0",
+      fontFamily: fontStack,
+      color: "#cf4e8d",
+      fontWeight: 700,
+      textAlign: "center",
+      display: "flex",
+      flexDirection: "column",
+      justifyContent: "space-between",
+      alignItems: "center",
+      position: "relative"
+    }}>
+      <div style={{ fontSize: "2.0em", marginBottom: 7, lineHeight: 1 }}>🎤</div>
+      <div style={{ fontSize: 18.5, color: "#E53D74", fontWeight: 900, marginBottom: 11 }}>
+        Audio / Video Calls
+      </div>
+      <div style={{ fontSize: 14.5, color: "#B24E7B", marginBottom: 8 }}>
+        Talk live with classmates.<br />
+        <span style={{ color: colorPalette.secondary, fontWeight: 600 }}>
+          (Feature coming soon)
+        </span>
+      </div>
+      <button
+        style={{
+          background: "#ffd1ea",
+          color: "#bc2071",
+          borderRadius: 38,
+          border: "none",
+          fontWeight: 700,
+          fontSize: 20,
+          padding: "7px 19px",
+          marginTop: 10,
+          boxShadow: "0 1.2px 7px #ffe3fb",
+          cursor: "not-allowed",
+          display: "flex",
+          alignItems: "center"
+        }}
+        type="button"
+        disabled
+        aria-label="Add Call (stub)"
+        title="Add Call (coming soon)"
+      >
+        <span style={{ fontSize: 22, marginRight: 8 }}>➕</span>
+        Add Call
+      </button>
+    </div>
+  </div>
+);
 
 /**
- * ClassroomView: unchanged, playful tabs with feature stubs.
+ * ClassroomView: tabbed navigation for primary in-classroom features
  */
 const ClassroomView = () => {
+  // All tab keys are lower-case for state
   const [tab, setTab] = useState("chat");
 
-  const tabMeta = [
-    { key: "chat", label: "Chat 💬" },
-    { key: "bulletin", label: "Bulletin Board 📌" },
-    { key: "notebook", label: "Notebook 📒" },
-    { key: "groups", label: "Group Projects 🧑‍🤝‍🧑" },
-    { key: "calls", label: "Calls 🎤" }
+  const tabs = [
+    { key: "chat", label: <>Chat <span style={{fontSize:18}}>💬</span></> },
+    { key: "bulletin", label: <>Bulletin Board <span style={{fontSize:18}}>📌</span></> },
+    { key: "notebook", label: <>Notebook <span style={{fontSize:18}}>📒</span></> },
+    { key: "services", label: <>Services <span style={{fontSize:18}}>🛠️</span></> }
   ];
 
   let content = null;
   switch (tab) {
     case "chat":
-      content = <ChatFeatureStub />;
+      content = <ClassroomChatStub />;
       break;
     case "bulletin":
-      content = <BulletinBoardStub />;
+      content = <ClassroomBulletinStub />;
       break;
     case "notebook":
-      content = <NotebookStub />;
+      content = <ClassroomNotebookStub />;
       break;
-    case "groups":
-      content = <GroupProjectsStub />;
-      break;
-    case "calls":
-      content = <AudioVideoCallsStub />;
+    case "services":
+      content = <ClassroomServicesStub />;
       break;
     default:
       content = null;
@@ -1084,12 +1392,13 @@ const ClassroomView = () => {
         background: colorPalette.card,
         borderRadius: 28,
         boxShadow: colorPalette.shadow,
-        padding: "30px 4vw 20px 4vw",
+        padding: "30px 4vw 24px 4vw",
         marginTop: 44,
         fontFamily: fontStack,
         minHeight: 330
       }}
     >
+      {/* Tab bar */}
       <div
         style={{
           display: "flex",
@@ -1098,7 +1407,7 @@ const ClassroomView = () => {
           justifyContent: "center"
         }}
       >
-        {tabMeta.map((tabEntry) => (
+        {tabs.map((tabEntry) => (
           <button
             key={tabEntry.key}
             style={{
@@ -1109,7 +1418,7 @@ const ClassroomView = () => {
               color: tab === tabEntry.key ? "#fff" : colorPalette.primary,
               border: "none",
               borderRadius: 40,
-              padding: "10px 22px",
+              padding: "10px 25px",
               fontWeight: 800,
               fontSize: 17,
               cursor: "pointer",
@@ -1121,7 +1430,8 @@ const ClassroomView = () => {
                   ? "0 3px 14px #dfeffc"
                   : "0 1px 2.5px #ffefd1",
               letterSpacing: 0.1,
-              opacity: tab === tabEntry.key ? 1.0 : 0.84
+              opacity: tab === tabEntry.key ? 1.0 : 0.84,
+              position: "relative"
             }}
             onClick={() => setTab(tabEntry.key)}
             onMouseOver={(e) => {
@@ -1137,7 +1447,7 @@ const ClassroomView = () => {
               }
             }}
             tabIndex={0}
-            aria-label={tabEntry.label}
+            aria-label={typeof tabEntry.label === "string" ? tabEntry.label : undefined}
           >
             {tabEntry.label}
           </button>

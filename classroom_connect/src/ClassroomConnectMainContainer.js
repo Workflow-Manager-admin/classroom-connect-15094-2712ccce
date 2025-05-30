@@ -894,6 +894,60 @@ const ClassroomJoinCreateForm = ({
           autoComplete="off"
           onSubmit={handleCreateSubmit}
         >
+          <div style={{ marginBottom: 15 }}>
+            <label
+              htmlFor="classroom-name"
+              style={{
+                display: "block",
+                fontWeight: 700,
+                marginBottom: 5,
+                color: colorPalette.primary,
+                fontSize: 16
+              }}
+            >
+              Classroom Name <span style={{ color: colorPalette.accent }}>*</span>
+            </label>
+            <input
+              id="classroom-name"
+              type="text"
+              maxLength={40}
+              required
+              value={classNameInput}
+              onChange={(e) => {
+                setClassNameInput(e.target.value);
+                setClassNameTouched(true);
+              }}
+              style={{
+                width: "100%",
+                padding: "11px 12px",
+                borderRadius: 12,
+                border:
+                  classNameTouched &&
+                  (!classNameInput || classNameInput.trim().length === 0)
+                    ? `2px solid ${colorPalette.accent}`
+                    : `1.6px solid ${colorPalette.primary}`,
+                fontSize: 17,
+                outline: "none",
+                background: colorPalette.bg,
+                color: colorPalette.text,
+                fontFamily: fontStack
+              }}
+              aria-required="true"
+              placeholder="e.g. Ms. Bell's Chemistry Lab"
+            />
+            {classNameTouched &&
+              (!classNameInput || classNameInput.trim().length === 0) && (
+                <div
+                  style={{
+                    color: colorPalette.accent,
+                    fontSize: 13,
+                    marginTop: 3
+                  }}
+                >
+                  Please enter a classroom name.
+                </div>
+              )}
+          </div>
           <div style={{ marginBottom: 18 }}>
             <label
               htmlFor="number-members"
@@ -950,7 +1004,13 @@ const ClassroomJoinCreateForm = ({
           </div>
           <button
             type="submit"
-            disabled={submitting || !membersInput || parseInt(membersInput, 10) < 1}
+            disabled={
+              submitting ||
+              !classNameInput ||
+              classNameInput.trim().length === 0 ||
+              !membersInput ||
+              parseInt(membersInput, 10) < 1
+            }
             style={{
               width: "100%",
               background: colorPalette.accent,

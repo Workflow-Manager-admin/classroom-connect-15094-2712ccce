@@ -308,7 +308,9 @@ const AudioVideoCallsStub = () => stubCard(
   <>Audio/Video Calls (stub) <br />Connect soon!</>
 );
 
-// ClassroomView: Tabs for feature stubs
+/**
+ * ClassroomView: Playful tabs, curved card, soft section, lively behavior.
+ */
 const ClassroomView = () => {
   const [tab, setTab] = useState("chat");
 
@@ -322,59 +324,78 @@ const ClassroomView = () => {
 
   let content = null;
   switch (tab) {
-    case "chat":
-      content = <ChatFeatureStub />;
-      break;
-    case "bulletin":
-      content = <BulletinBoardStub />;
-      break;
-    case "notebook":
-      content = <NotebookStub />;
-      break;
-    case "groups":
-      content = <GroupProjectsStub />;
-      break;
-    case "calls":
-      content = <AudioVideoCallsStub />;
-      break;
-    default:
-      content = null;
+    case "chat": content = <ChatFeatureStub />; break;
+    case "bulletin": content = <BulletinBoardStub />; break;
+    case "notebook": content = <NotebookStub />; break;
+    case "groups": content = <GroupProjectsStub />; break;
+    case "calls": content = <AudioVideoCallsStub />; break;
+    default: content = null;
   }
 
   return (
-    <section style={{
-      margin: "0 auto",
-      maxWidth: 750,
-      background: "#fff",
-      borderRadius: 22,
-      boxShadow: "0 2px 18px #eff0f4",
-      padding: "26px 18px 32px 18px",
-      marginTop: 35,
-      minHeight: 340,
-    }}>
-      <div style={{ display: "flex", gap: 6, marginBottom: 18, justifyContent: "center" }}>
-        {tabMeta.map(tabEntry =>
+    <section
+      style={{
+        margin: "0 auto",
+        maxWidth: 780,
+        background: colorPalette.card,
+        borderRadius: 28,
+        boxShadow: colorPalette.shadow,
+        padding: "30px 4vw 20px 4vw",
+        marginTop: 44,
+        fontFamily: fontStack,
+        minHeight: 330
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          gap: 8,
+          marginBottom: 20,
+          justifyContent: "center"
+        }}
+      >
+        {tabMeta.map(tabEntry => (
           <button
             key={tabEntry.key}
             style={{
               background: tab === tabEntry.key ? colorPalette.primary : colorPalette.secondary,
               color: tab === tabEntry.key ? "#fff" : colorPalette.primary,
               border: "none",
-              borderRadius: 18,
-              padding: "8px 20px",
-              fontWeight: 600,
+              borderRadius: 40,
+              padding: "10px 22px",
+              fontWeight: 800,
               fontSize: 17,
               cursor: "pointer",
-              boxShadow: tab === tabEntry.key ? "0 2px 7px #e1eafc" : "none",
-              outline: "none"
+              fontFamily: fontStack,
+              outline: "none",
+              transition: "all 0.11s",
+              boxShadow: tab === tabEntry.key
+                ? "0 3px 14px #dfeffc"
+                : "0 1px 2.5px #ffefd1",
+              letterSpacing: 0.1,
+              opacity: tab === tabEntry.key ? 1.0 : 0.84
             }}
             onClick={() => setTab(tabEntry.key)}
-          >{tabEntry.label}</button>
-        )}
+            onMouseOver={e => {
+              if (tab !== tabEntry.key) {
+                e.currentTarget.style.background = "#ffe37a";
+                e.currentTarget.style.color = colorPalette.primary;
+              }
+            }}
+            onMouseOut={e => {
+              if (tab !== tabEntry.key) {
+                e.currentTarget.style.background = colorPalette.secondary;
+                e.currentTarget.style.color = colorPalette.primary;
+              }
+            }}
+            tabIndex={0}
+            aria-label={tabEntry.label}
+          >
+            {tabEntry.label}
+          </button>
+        ))}
       </div>
-      <div>
-        {content}
-      </div>
+      {content}
     </section>
   );
 };

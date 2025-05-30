@@ -242,48 +242,70 @@ const ClassroomJoinCreateForm = () => (
   </section>
 );
 
-// Feature stub components
-
-const ChatFeatureStub = () => (
-  <div style={{
-    textAlign: "center",
-    color: colorPalette.primary,
-    padding: "30px 0"
-  }}>Chat feature coming soon! 💬</div>
-);
-const BulletinBoardStub = () => (
-  <div style={{
-    textAlign: "center",
-    color: colorPalette.accent,
-    padding: "30px 0"
-  }}>Bulletin Board stub – Post reminders here! 📌</div>
-);
-const NotebookStub = () => (
-  <div style={{
-    textAlign: "center",
-    color: colorPalette.secondary,
-    padding: "30px 0",
-    fontWeight: 600
-  }}>Notebook space (stub) 📒</div>
-);
-const GroupProjectsStub = () => (
-  <div style={{
-    textAlign: "center",
-    color: colorPalette.primary,
-    padding: "30px 0"
-  }}>
-    Group Projects coming soon! 👫
+/**
+ * Feature stub cards: Soft backgrounds, playful font, curved cards.
+ */
+const stubCard = (color, icon, text) => (
+  <div
+    style={{
+      margin: "12px auto",
+      padding: "36px 0 34px 0",
+      width: "97%",
+      background: color,
+      borderRadius: 18,
+      fontFamily: fontStack,
+      fontWeight: 700,
+      color: "#444",
+      textAlign: "center",
+      fontSize: "1.16rem",
+      boxShadow: "0 1px 12px #f5f6f9, 0 1px 22px #fae9dc",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center",
+      letterSpacing: 0.03,
+      minHeight: 98
+    }}
+  >
+    <span style={{
+      fontSize: "1.7em",
+      marginBottom: 3,
+      filter: "drop-shadow(0 1px 2px #fdf5ff)"
+    }}>{icon}</span>
+    <span>
+      {text}
+    </span>
   </div>
 );
 
-const AudioVideoCallsStub = () => (
-  <div style={{
-    textAlign: "center",
-    color: colorPalette.accent,
-    padding: "30px 0"
-  }}>
-    Audio/Video Calls (stub) 🎤
-  </div>
+const ChatFeatureStub = () => stubCard(
+  colorPalette.highlight,
+  "💬",
+  <>Public Chat coming soon! <span style={{ color: colorPalette.primary, fontWeight: 800 }}>Excited?</span></>
+);
+
+const BulletinBoardStub = () => stubCard(
+  colorPalette.cardAlt,
+  "📌",
+  <>Bulletin Board for reminders coming soon!</>
+);
+
+const NotebookStub = () => stubCard(
+  colorPalette.secondary,
+  "📒",
+  <>Collaborative Notebook (stub)<br />Let ideas fly!</>
+);
+
+const GroupProjectsStub = () => stubCard(
+  "#E1F9F2",
+  "🧑‍🤝‍🧑",
+  <>Group Projects feature coming soon!</>
+);
+
+const AudioVideoCallsStub = () => stubCard(
+  "#FFF1F8",
+  "🎤",
+  <>Audio/Video Calls (stub) <br />Connect soon!</>
 );
 
 // ClassroomView: Tabs for feature stubs

@@ -10,114 +10,140 @@ const colorPalette = {
   nav: "#F6F7FA",
 };
 
-type MainView =
-  | "dashboard"
-  | "joinCreate"
-  | "classroom"
-  ;
-
-// PUBLIC_INTERFACE
-/** Dashboard placeholder */
-function Dashboard() {
-  return (
-    <section style={{ textAlign: "center", marginTop: 48 }}>
-      <h2 style={{ color: colorPalette.primary, marginBottom: 16 }}>Dashboard</h2>
-      <p style={{ color: colorPalette.text }}>See your joined Classrooms here.</p>
-      <div style={{
-        margin: "2rem auto", display: "flex", gap: "1.5rem", justifyContent: "center",
-        flexWrap: "wrap"
-      }}>
-        <div style={{
-          background: colorPalette.secondary,
-          borderRadius: 16,
-          width: 180,
-          height: 110,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          boxShadow: "0 2px 8px #e5e5e5",
-          fontWeight: "bold",
-          color: colorPalette.primary,
-        }}>
-          Classroom Card (stub)
-        </div>
-        <div style={{
-          background: colorPalette.accent,
-          borderRadius: 16,
-          width: 180,
-          height: 110,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          fontWeight: "bold",
-          color: "#fff",
-          boxShadow: "0 2px 8px #e5e5e5",
-        }}>
-          Add Classroom +
-        </div>
-      </div>
-    </section>
-  );
-}
-
-// PUBLIC_INTERFACE
-/** Classroom Join/Create placeholder */
-function ClassroomJoinCreateForm() {
-  return (
-    <section style={{
-      margin: "3rem auto",
-      background: "#FFF",
-      padding: 32,
-      borderRadius: 18,
-      maxWidth: 350,
-      boxShadow: "0 2px 24px #e8e8e8"
+const Dashboard = () => (
+  <section style={{ textAlign: "center", marginTop: 48 }}>
+    <h2 style={{ color: colorPalette.primary, marginBottom: 16 }}>Dashboard</h2>
+    <p style={{ color: colorPalette.text }}>See your joined Classrooms here.</p>
+    <div style={{
+      margin: "2rem auto", display: "flex", gap: "1.5rem", justifyContent: "center",
+      flexWrap: "wrap"
     }}>
-      <h2 style={{ marginBottom: 20, color: colorPalette.primary }}>
-        Join or Create Classroom
-      </h2>
-      <input
-        type="text"
-        placeholder="Enter classroom code"
-        style={{
-          width: "100%",
-          padding: 12,
-          borderRadius: 10,
-          border: `1.5px solid ${colorPalette.primary}`,
-          fontSize: 17,
-          marginBottom: 14,
-          outline: "none"
-        }}
-      />
-      <div style={{ display: "flex", gap: 12 }}>
-        <button style={{
-          flex: 1,
-          background: colorPalette.primary,
-          color: "#fff",
-          fontWeight: 600,
-          borderRadius: 10,
-          padding: "10px 0",
-          border: "none",
-          cursor: "pointer"
-        }}>Join</button>
-        <button style={{
-          flex: 1,
-          background: colorPalette.accent,
-          color: "#fff",
-          fontWeight: 600,
-          borderRadius: 10,
-          padding: "10px 0",
-          border: "none",
-          cursor: "pointer"
-        }}>Create</button>
+      <div style={{
+        background: colorPalette.secondary,
+        borderRadius: 16,
+        width: 180,
+        height: 110,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        boxShadow: "0 2px 8px #e5e5e5",
+        fontWeight: "bold",
+        color: colorPalette.primary,
+      }}>
+        Classroom Card (stub)
       </div>
-    </section>
-  );
-}
+      <div style={{
+        background: colorPalette.accent,
+        borderRadius: 16,
+        width: 180,
+        height: 110,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        fontWeight: "bold",
+        color: "#fff",
+        boxShadow: "0 2px 8px #e5e5e5",
+      }}>
+        Add Classroom +
+      </div>
+    </div>
+  </section>
+);
 
-// PUBLIC_INTERFACE
-/** Stub for in-classroom main view with tabs for sub-features */
-function ClassroomView() {
-  const [tab, setTab] = useState<"chat" | "bulletin" | "notebook" | "groups" | "calls">("chat");
+const ClassroomJoinCreateForm = () => (
+  <section style={{
+    margin: "3rem auto",
+    background: "#FFF",
+    padding: 32,
+    borderRadius: 18,
+    maxWidth: 350,
+    boxShadow: "0 2px 24px #e8e8e8"
+  }}>
+    <h2 style={{ marginBottom: 20, color: colorPalette.primary }}>
+      Join or Create Classroom
+    </h2>
+    <input
+      type="text"
+      placeholder="Enter classroom code"
+      style={{
+        width: "100%",
+        padding: 12,
+        borderRadius: 10,
+        border: `1.5px solid ${colorPalette.primary}`,
+        fontSize: 17,
+        marginBottom: 14,
+        outline: "none"
+      }}
+    />
+    <div style={{ display: "flex", gap: 12 }}>
+      <button style={{
+        flex: 1,
+        background: colorPalette.primary,
+        color: "#fff",
+        fontWeight: 600,
+        borderRadius: 10,
+        padding: "10px 0",
+        border: "none",
+        cursor: "pointer"
+      }}>Join</button>
+      <button style={{
+        flex: 1,
+        background: colorPalette.accent,
+        color: "#fff",
+        fontWeight: 600,
+        borderRadius: 10,
+        padding: "10px 0",
+        border: "none",
+        cursor: "pointer"
+      }}>Create</button>
+    </div>
+  </section>
+);
+
+const ChatFeatureStub = () => (
+  <div style={{
+    textAlign: "center",
+    color: colorPalette.primary,
+    padding: "30px 0"
+  }}>Chat feature coming soon! 💬</div>
+);
+const BulletinBoardStub = () => (
+  <div style={{
+    textAlign: "center",
+    color: colorPalette.accent,
+    padding: "30px 0"
+  }}>Bulletin Board stub – Post reminders here! 📌</div>
+);
+const NotebookStub = () => (
+  <div style={{
+    textAlign: "center",
+    color: colorPalette.secondary,
+    padding: "30px 0",
+    fontWeight: 600
+  }}>Notebook space (stub) 📒</div>
+);
+const GroupProjectsStub = () => (
+  <div style={{
+    textAlign: "center",
+    color: colorPalette.primary,
+    padding: "30px 0"
+  }}>
+    Group Projects coming soon! 👫
+  </div>
+);
+
+const AudioVideoCallsStub = () => (
+  <div style={{
+    textAlign: "center",
+    color: colorPalette.accent,
+    padding: "30px 0"
+  }}>
+    Audio/Video Calls (stub) 🎤
+  </div>
+);
+
+const ClassroomView = () => {
+  const [tab, setTab] = useState("chat");
 
   const tabMeta = [
     { key: "chat", label: "Chat 💬" },
@@ -125,9 +151,9 @@ function ClassroomView() {
     { key: "notebook", label: "Notebook 📒" },
     { key: "groups", label: "Group Projects 🧑‍🤝‍🧑" },
     { key: "calls", label: "Calls 🎤" },
-  ] as const;
+  ];
 
-  let content: React.ReactNode = null;
+  let content = null;
   switch (tab) {
     case "chat":
       content = <ChatFeatureStub />;
@@ -175,7 +201,7 @@ function ClassroomView() {
               boxShadow: tab === tabEntry.key ? "0 2px 7px #e1eafc" : "none",
               outline: "none"
             }}
-            onClick={() => setTab(tabEntry.key as typeof tab)}
+            onClick={() => setTab(tabEntry.key)}
           >{tabEntry.label}</button>
         )}
       </div>
@@ -184,71 +210,11 @@ function ClassroomView() {
       </div>
     </section>
   );
-}
-
-// Feature stubs
-// PUBLIC_INTERFACE
-function ChatFeatureStub() {
-  return (
-    <div style={{
-      textAlign: "center",
-      color: colorPalette.primary,
-      padding: "30px 0"
-    }}>Chat feature coming soon! 💬</div>
-  );
-}
-// PUBLIC_INTERFACE
-function BulletinBoardStub() {
-  return (
-    <div style={{
-      textAlign: "center",
-      color: colorPalette.accent,
-      padding: "30px 0"
-    }}>Bulletin Board stub – Post reminders here! 📌</div>
-  );
-}
-// PUBLIC_INTERFACE
-function NotebookStub() {
-  return (
-    <div style={{
-      textAlign: "center",
-      color: colorPalette.secondary,
-      padding: "30px 0",
-      fontWeight: 600
-    }}>Notebook space (stub) 📒</div>
-  );
-}
-// PUBLIC_INTERFACE
-function GroupProjectsStub() {
-  return (
-    <div style={{
-      textAlign: "center",
-      color: colorPalette.primary,
-      padding: "30px 0"
-    }}>
-      Group Projects coming soon! 👫
-    </div>
-  );
-}
-// PUBLIC_INTERFACE
-function AudioVideoCallsStub() {
-  return (
-    <div style={{
-      textAlign: "center",
-      color: colorPalette.accent,
-      padding: "30px 0"
-    }}>
-      Audio/Video Calls (stub) 🎤
-    </div>
-  );
-}
+};
 
 // PUBLIC_INTERFACE
-/**
- * Main container for Classroom Connect -- hosts navigation and feature stubs.
- */
-export const ClassroomConnectMainContainer: React.FC = () => {
-  const [mainView, setMainView] = useState<MainView>("dashboard");
+export const ClassroomConnectMainContainer = () => {
+  const [mainView, setMainView] = useState("dashboard");
 
   return (
     <div style={{
@@ -369,6 +335,4 @@ export const ClassroomConnectMainContainer: React.FC = () => {
     </div>
   );
 };
-
-// If default export is preferred for integration, uncomment next line:
-// export default ClassroomConnectMainContainer;
+// Optionally for legacy compat: export default ClassroomConnectMainContainer;

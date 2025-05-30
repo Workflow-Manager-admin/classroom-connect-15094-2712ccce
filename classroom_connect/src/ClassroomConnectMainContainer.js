@@ -155,76 +155,111 @@ const Dashboard = ({
               background: "transparent",
             }}
           >
-            {myClassrooms.map((classroom, idx) => (
-              <div
-                key={classroom.code || idx}
-                style={{
-                  background: colorPalette.card,
-                  borderRadius: 20,
-                  width: 200,
-                  height: 128,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  boxShadow: colorPalette.shadow,
-                  fontWeight: 700,
-                  color: colorPalette.primary,
-                  fontFamily: fontStack,
-                  transition: "transform 0.14s, box-shadow 0.15s",
-                  cursor: "pointer",
-                  fontSize: "1.15rem",
-                  position: "relative",
-                }}
-                tabIndex={0}
-                onMouseOver={(e) => {
-                  e.currentTarget.style.transform = "scale(1.04)";
-                  e.currentTarget.style.boxShadow = "0 8px 32px 0 #ffe8bb";
-                }}
-                onMouseOut={(e) => {
-                  e.currentTarget.style.transform = "";
-                  e.currentTarget.style.boxShadow = colorPalette.shadow;
-                }}
-                onFocus={(e) => {
-                  e.currentTarget.style.transform = "scale(1.04)";
-                  e.currentTarget.style.boxShadow = "0 8px 32px 0 #ffe8bb";
-                }}
-                onBlur={(e) => {
-                  e.currentTarget.style.transform = "";
-                  e.currentTarget.style.boxShadow = colorPalette.shadow;
-                }}
-                aria-label={`Classroom ${classroom.code}`}
-                title={`Classroom Code: ${classroom.code}${classroom.members ? ` (${classroom.members} members)` : ""}`}
-                onClick={() => handleEnterClassroom(classroom)}
-                onKeyPress={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    handleEnterClassroom(classroom);
-                  }
-                }}
-              >
-                <span
-                  role="img"
-                  aria-label="notebook"
-                  style={{ fontSize: "1.6em", marginRight: 10 }}
+            {myClassrooms.map((classroom, idx) => {
+              // Find currentMembers/maxMembers from in-memory (if any)
+              let stats = null;
+              if (
+                window._classroomConnectInMemoryClassrooms &&
+                classroom.code
+              ) {
+                const real = window._classroomConnectInMemoryClassrooms.find(
+                  (c) => c.code === classroom.code
+                );
+                if (real) {
+                  stats = {
+                    current: real.currentMembers,
+                    max: real.maxMembers,
+                  };
+                }
+              }
+              return (
+                <div
+                  key={classroom.code || idx}
+                  style={{
+                    background: colorPalette.card,
+                    borderRadius: 20,
+                    width: 200,
+                    height: 128,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    boxShadow: colorPalette.shadow,
+                    fontWeight: 700,
+                    color: colorPalette.primary,
+                    fontFamily: fontStack,
+                    transition: "transform 0.14s, box-shadow 0.15s",
+                    cursor: "pointer",
+                    fontSize: "1.15rem",
+                    position: "relative",
+                  }}
+                  tabIndex={0}
+                  onMouseOver={(e) => {
+                    e.currentTarget.style.transform = "scale(1.04)";
+                    e.currentTarget.style.boxShadow = "0 8px 32px 0 #ffe8bb";
+                  }}
+                  onMouseOut={(e) => {
+                    e.currentTarget.style.transform = "";
+                    e.currentTarget.style.boxShadow = colorPalette.shadow;
+                  }}
+                  onFocus={(e) => {
+                    e.currentTarget.style.transform = "scale(1.04)";
+                    e.currentTarget.style.boxShadow = "0 8px 32px 0 #ffe8bb";
+                  }}
+                  onBlur={(e) => {
+                    e.currentTarget.style.transform = "";
+                    e.currentTarget.style.boxShadow = colorPalette.shadow;
+                  }}
+                  aria-label={`Classroom ${classroom.code}`}
+                  title={`Classroom Code: ${classroom.code}${
+                    stats
+                      ? ` (${stats.current}/${stats.max} members)`
+                      : classroom.members
+                      ? ` (${classroom.members} max)`
+                      : ""
+                  }`}
+                  onClick={() => handleEnterClassroom(classroom)}
+                  onKeyPress={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      handleEnterClassroom(classroom);
+                    }
+                  }}
                 >
-                  📗
-                </span>
-                <span>
-                  {classroom.code}
-                  {classroom.members ? (
-                    <span
-                      style={{
-                        color: colorPalette.accent,
-                        marginLeft: 5,
-                        fontWeight: 600,
-                        fontSize: 15,
-                      }}
-                    >
-                      ({classroom.members})
-                    </span>
-                  ) : null}
-                </span>
-              </div>
-            ))}
+                  <span
+                    role="img"
+                    aria-label="notebook"
+                    style={{ fontSize: "1.6em", marginRight: 10 }}
+                  >
+                    📗
+                  </span>
+                  <span>
+                    {classroom.code}
+                    {stats ? (
+                      <span
+                        style={{
+                          color: colorPalette.accent,
+                          marginLeft: 5,
+                          fontWeight: 600,
+                          fontSize: 15,
+                        }}
+                      >
+                        ({stats.current}/{stats.max})
+                      </span>
+                    ) : classroom.members ? (
+                      <span
+                        style={{
+                          color: colorPalette.accent,
+                          marginLeft: 5,
+                          fontWeight: 600,
+                          fontSize: 15,
+                        }}
+                      >
+                        ({classroom.members})
+                      </span>
+                    ) : null}
+                  </span>
+                </div>
+              );
+            })}
             <div
               style={{
                 background: colorPalette.accent,
@@ -1558,62 +1593,95 @@ export const ClassroomConnectMainContainer = () => {
   };
 
   // ClassroomView: now gets classroom prop and return handler
-  const ClassroomViewContainer = ({ classroom }) => (
-    <div>
-      <div style={{ marginBottom: 15, marginTop: 10, textAlign: "right" }}>
-        <button
+  const ClassroomViewContainer = ({ classroom }) => {
+    // Find currentMembers/maxMembers from in-memory array if possible
+    let stats = null;
+    if (
+      window._classroomConnectInMemoryClassrooms &&
+      classroom.code
+    ) {
+      const real = window._classroomConnectInMemoryClassrooms.find(
+        (c) => c.code === classroom.code
+      );
+      if (real) {
+        stats = {
+          current: real.currentMembers,
+          max: real.maxMembers,
+        };
+      }
+    }
+    return (
+      <div>
+        <div style={{ marginBottom: 15, marginTop: 10, textAlign: "right" }}>
+          <button
+            style={{
+              background: colorPalette.accent,
+              color: "#fff",
+              border: "none",
+              borderRadius: 10,
+              padding: "7px 21px",
+              fontWeight: 700,
+              fontFamily: fontStack,
+              fontSize: 16,
+              float: "right",
+              cursor: "pointer",
+              margin: "0 7px 0 0",
+              boxShadow: colorPalette.shadow,
+              transition: "background 0.12s",
+            }}
+            onClick={handleLeaveClassroom}
+            onMouseOver={(e) => {
+              e.currentTarget.style.background = "#fa4b6a";
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.background = colorPalette.accent;
+            }}
+          >
+            ← Back to Dashboard
+          </button>
+        </div>
+        <h2
           style={{
-            background: colorPalette.accent,
-            color: "#fff",
-            border: "none",
-            borderRadius: 10,
-            padding: "7px 21px",
-            fontWeight: 700,
+            color: colorPalette.primary,
             fontFamily: fontStack,
-            fontSize: 16,
-            float: "right",
-            cursor: "pointer",
-            margin: "0 7px 0 0",
-            boxShadow: colorPalette.shadow,
-            transition: "background 0.12s"
-          }}
-          onClick={handleLeaveClassroom}
-          onMouseOver={(e) => {
-            e.currentTarget.style.background = "#fa4b6a";
-          }}
-          onMouseOut={(e) => {
-            e.currentTarget.style.background = colorPalette.accent;
+            fontWeight: 900,
+            letterSpacing: 1,
+            fontSize: "2.0rem",
+            marginBottom: 6,
+            marginTop: 24,
+            textAlign: "center",
           }}
         >
-          ← Back to Dashboard
-        </button>
+          Classroom <b>{classroom.code}</b>
+          {stats ? (
+            <span
+              style={{
+                color: colorPalette.accent,
+                marginLeft: 12,
+                fontWeight: 700,
+                fontSize: 19,
+              }}
+            >
+              ({stats.current}/{stats.max} members)
+            </span>
+          ) : classroom.members ? (
+            <span
+              style={{
+                color: colorPalette.accent,
+                marginLeft: 12,
+                fontWeight: 700,
+                fontSize: 19,
+              }}
+            >
+              ({classroom.members} members)
+            </span>
+          ) : null}
+        </h2>
+        <div style={{ marginBottom: 30 }} />
+        <ClassroomView />
       </div>
-      <h2 style={{
-        color: colorPalette.primary,
-        fontFamily: fontStack,
-        fontWeight: 900,
-        letterSpacing: 1,
-        fontSize: "2.0rem",
-        marginBottom: 6,
-        marginTop: 24,
-        textAlign: "center",
-      }}>
-        Classroom <b>{classroom.code}</b>
-        {classroom.members ? (
-          <span style={{
-            color: colorPalette.accent,
-            marginLeft: 12,
-            fontWeight: 700,
-            fontSize: 19
-          }}>
-            ({classroom.members} members)
-          </span>
-        ) : null}
-      </h2>
-      <div style={{marginBottom: 30}} />
-      <ClassroomView />
-    </div>
-  );
+    );
+  };
 
   return (
     <div

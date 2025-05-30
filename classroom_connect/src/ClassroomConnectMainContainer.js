@@ -406,12 +406,15 @@ const ClassroomJoinCreateForm = ({
 }) => {
   const [mode, setMode] = useState("join"); // or "create"
   const [joinCodeInput, setJoinCodeInput] = useState("");
+  const [classNameInput, setClassNameInput] = useState("");
+  const [classNameTouched, setClassNameTouched] = useState(false);
   const [membersInput, setMembersInput] = useState("");
   const [membersTouched, setMembersTouched] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [created, setCreated] = useState(false);
   const [newClassroomCode, setNewClassroomCode] = useState("");
   const [newClassroomMembers, setNewClassroomMembers] = useState(null);
+  const [newClassName, setNewClassName] = useState("");
 
   // In-memory array demo: shared instance on window for non-reactive, non-persistent storage
   if (!window._classroomConnectInMemoryClassrooms) {
@@ -435,9 +438,12 @@ const ClassroomJoinCreateForm = ({
   // Reset when mode changes
   React.useEffect(() => {
     setJoinCodeInput("");
+    setClassNameInput("");
+    setClassNameTouched(false);
     setMembersInput("");
     setCreated(false);
     setNewClassroomCode("");
+    setNewClassName("");
     setNewClassroomMembers(null);
     setMembersTouched(false);
     setJoinError("");

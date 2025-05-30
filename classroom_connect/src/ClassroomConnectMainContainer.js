@@ -1153,14 +1153,94 @@ const ClassroomView = () => {
  * Main Container: holds classrooms list state, passes it down, and updates on join.
  */
 export const ClassroomConnectMainContainer = () => {
+  // Track: main view (dashboard, joinCreate, classroom), and which classroom is open (if any)
   const [mainView, setMainView] = useState("dashboard");
   const [myClassrooms, setMyClassrooms] = useState(getAllMyClassroomsFromStorage());
+  const [activeClassroom, setActiveClassroom] = useState(null);
 
+  // Open join/create flow
   const goToJoinCreate = () => setMainView("joinCreate");
 
+  // After classroom joined, go straight to classroom and remember which
   const handleJoinedClassroom = (classroom) => {
-    // This can be hooked for notifications or to open classroom
+    // Safety: ensure the code is normalized
+    if (classroom && classroom.code) {
+      setActiveClassroom(classroom);
+      setMainView("classroom");
+    }
   };
+
+  // Open classroom from dashboard
+  const handleEnterClassroom = (classroom) => {
+    if (classroom && classroom.code) {
+      setActiveClassroom(classroom);
+      setMainView("classroom");
+    }
+  };
+
+  // Optional: handle leaving a classroom, just returns to dashboard for now
+  const handleLeaveClassroom = () => {
+    setActiveClassroom(null);
+    setMainView("dashboard");
+  };
+
+  // ClassroomView: now gets classroom prop and return handler
+  const ClassroomViewContainer = ({ classroom }) => (
+    <div>
+      <div style={{ marginBottom: 15, marginTop: 10, textAlign: "right" }}>
+        <button
+          style={{
+            background: colorPalette.accent,
+            color: "#fff",
+            border: "none",
+            borderRadius: 10,
+            padding: "7px 21px",
+            fontWeight: 700,
+            fontFamily: fontStack,
+            fontSize: 16,
+            float: "right",
+            cursor: "pointer",
+            margin: "0 7px 0 0",
+            boxShadow: colorPalette.shadow,
+            transition: "background 0.12s"
+          }}
+          onClick={handleLeaveClassroom}
+          onMouseOver={(e) => {
+            e.currentTarget.style.background = "#fa4b6a";
+          }}
+          onMouseOut={(e) => {
+            e.currentTarget.style.background = colorPalette.accent;
+          }}
+        >
+          ← Back to Dashboard
+        </button>
+      </div>
+      <h2 style={{
+        color: colorPalette.primary,
+        fontFamily: fontStack,
+        fontWeight: 900,
+        letterSpacing: 1,
+        fontSize: "2.0rem",
+        marginBottom: 6,
+        marginTop: 24,
+        textAlign: "center",
+      }}>
+        Classroom <b>{classroom.code}</b>
+        {classroom.members ? (
+          <span style={{
+            color: colorPalette.accent,
+            marginLeft: 12,
+            fontWeight: 700,
+            fontSize: 19
+          }}>
+            ({classroom.members} members)
+          </span>
+        ) : null}
+      </h2>
+      <div style={{marginBottom: 30}} />
+      <ClassroomView />
+    </div>
+  );
 
   return (
     <div
@@ -1169,7 +1249,7 @@ export const ClassroomConnectMainContainer = () => {
         background: `linear-gradient(-4deg, #f9fafb 60%, #fbd46d17 100%), ${colorPalette.bg}`,
         fontFamily: fontStack,
         display: "flex",
-        flexDirection: "column"
+        flexDirection: "column",
       }}
     >
       {/* Playful Navbar */}
@@ -1187,7 +1267,7 @@ export const ClassroomConnectMainContainer = () => {
           borderBottomLeftRadius: 32,
           borderBottomRightRadius: 32,
           minHeight: 62,
-          position: "relative"
+          position: "relative",
         }}
       >
         <div
@@ -1197,7 +1277,7 @@ export const ClassroomConnectMainContainer = () => {
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            fontFamily: fontStack
+            fontFamily: fontStack,
           }}
         >
           <div
@@ -1211,7 +1291,7 @@ export const ClassroomConnectMainContainer = () => {
               paddingLeft: 9,
               color: "#fff",
               fontFamily: fontStack,
-              textShadow: "0 1.5px 3px #a6e8ed70"
+              textShadow: "0 1.5px 3px #a6e8ed70",
             }}
           >
             <span
@@ -1232,7 +1312,7 @@ export const ClassroomConnectMainContainer = () => {
                 fontFamily: fontStack,
                 fontSize: "1.25rem",
                 boxShadow: "0 1.2px 8px #fbf5d6",
-                border: "2.5px solid #fffbe5"
+                border: "2.5px solid #fffbe5",
               }}
             >
               <svg
@@ -1296,7 +1376,7 @@ export const ClassroomConnectMainContainer = () => {
               style={{
                 color: "#fff",
                 fontWeight: 900,
-                fontFamily: fontStack
+                fontFamily: fontStack,
               }}
             >
               Classroom Connect
@@ -1304,7 +1384,10 @@ export const ClassroomConnectMainContainer = () => {
           </div>
           <div style={{ display: "flex", gap: 12, fontFamily: fontStack }}>
             <button
-              onClick={() => setMainView("dashboard")}
+              onClick={() => {
+                setMainView("dashboard");
+                setActiveClassroom(null);
+              }}
               style={{
                 background:
                   mainView === "dashboard"
@@ -1328,7 +1411,7 @@ export const ClassroomConnectMainContainer = () => {
                   mainView === "dashboard"
                     ? "0 2px 8px #f8e7b4"
                     : "0 0.5px 2px #97e5e341",
-                transition: "all 0.14s"
+                transition: "all 0.14s",
               }}
               onMouseOver={(e) => {
                 if (mainView !== "dashboard") {
@@ -1349,7 +1432,10 @@ export const ClassroomConnectMainContainer = () => {
               Dashboard
             </button>
             <button
-              onClick={() => setMainView("joinCreate")}
+              onClick={() => {
+                setMainView("joinCreate");
+                setActiveClassroom(null);
+              }}
               style={{
                 background:
                   mainView === "joinCreate"
@@ -1373,7 +1459,7 @@ export const ClassroomConnectMainContainer = () => {
                   mainView === "joinCreate"
                     ? "0 2px 8px #f8e7b4"
                     : "0 0.5px 2px #97e5e341",
-                transition: "all 0.14s"
+                transition: "all 0.14s",
               }}
               onMouseOver={(e) => {
                 if (mainView !== "joinCreate") {
@@ -1393,7 +1479,6 @@ export const ClassroomConnectMainContainer = () => {
             >
               Join/Create
             </button>
-            {/* Removed the Classroom navigation button from navbar as requested */}
           </div>
         </div>
       </nav>
@@ -1405,7 +1490,7 @@ export const ClassroomConnectMainContainer = () => {
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          fontFamily: fontStack
+          fontFamily: fontStack,
         }}
       >
         {mainView === "dashboard" && (
@@ -1413,6 +1498,7 @@ export const ClassroomConnectMainContainer = () => {
             myClassrooms={myClassrooms}
             setMyClassrooms={setMyClassrooms}
             onGoToJoinCreate={goToJoinCreate}
+            onEnterClassroom={handleEnterClassroom}
           />
         )}
         {mainView === "joinCreate" && (
@@ -1423,7 +1509,9 @@ export const ClassroomConnectMainContainer = () => {
             setMainView={setMainView}
           />
         )}
-        {mainView === "classroom" && <ClassroomView />}
+        {mainView === "classroom" && activeClassroom && (
+          <ClassroomViewContainer classroom={activeClassroom} />
+        )}
       </main>
       <footer
         style={{
@@ -1433,7 +1521,7 @@ export const ClassroomConnectMainContainer = () => {
           margin: "24px 0 15px 0",
           letterSpacing: 0.03,
           fontWeight: 500,
-          fontFamily: fontStack
+          fontFamily: fontStack,
         }}
       >
         © {new Date().getFullYear()} Classroom Connect · For playful collaboration!

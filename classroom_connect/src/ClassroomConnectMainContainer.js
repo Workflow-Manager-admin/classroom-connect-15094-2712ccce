@@ -387,7 +387,7 @@ const Dashboard = ({
 };
 
 /**
- * Join/create classroom form. On join, validates against backend and emits storage/state update.
+ * Join/create classroom form. On join, validates against in-memory array (frontend-only, no backend).
  */
 const generateClassroomCode = () => {
   const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -413,20 +413,12 @@ const ClassroomJoinCreateForm = ({
   const [newClassroomCode, setNewClassroomCode] = useState("");
   const [newClassroomMembers, setNewClassroomMembers] = useState(null);
 
-  // Backend config: use environment variable if available, otherwise fallback to default
-  // Set REACT_APP_BACKEND_URL in your .env file (in classroom_connect/) to override the backend API base URL.
-  // e.g. REACT_APP_BACKEND_URL=https://your-production-backend.com
-  const BACKEND_URL =
-    (typeof process !== "undefined" &&
-      process.env &&
-      process.env.REACT_APP_BACKEND_URL) ||
-    (typeof window !== "undefined" &&
-      window.REACT_APP_BACKEND_URL) ||
-    (typeof window !== "undefined" &&
-      window.env &&
-      window.env.REACT_APP_BACKEND_URL) ||
-    "http://localhost:4555";
-  // Use actual app origin for join link
+  // In-memory array demo: shared instance on window for non-reactive, non-persistent storage
+  if (!window._classroomConnectInMemoryClassrooms) {
+    window._classroomConnectInMemoryClassrooms = [];
+  }
+  const classroomsRef = window._classroomConnectInMemoryClassrooms;
+
   const APP_ORIGIN =
     typeof window !== "undefined" &&
     window.location &&
@@ -453,10 +445,11 @@ const ClassroomJoinCreateForm = ({
     setJoinSuccessInfo(null);
     setSubmitting(false);
     setJoinLoading(false);
+    // Reset any temporary errors/messages
   }, [mode]);
 
-  // PUBLIC_INTERFACE (Join)
-  const handleJoinSubmit = async (e) => {
+  // PUBLIC_INTERFACE (Join, frontend stub)
+  const handleJoinSubmit = (e) => {
     e.preventDefault();
     setJoinError("");
     setJoinLoading(true);
@@ -469,118 +462,84 @@ const ClassroomJoinCreateForm = ({
       return;
     }
 
-    try {
-      const res = await fetch(`${BACKEND_URL}/classrooms/${code}`);
-      if (res.status === 404) {
-        setJoinError("Classroom not found. Check your code and try again.");
-      } else if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        setJoinError(data?.error || "Failed to join classroom.");
-      } else {
-        const body = await res.json();
-        setJoinError("");
-        setJoinSuccessInfo(body.classroom);
-        addClassroomToStorage(body.classroom, setMyClassrooms);
-        if (typeof onJoinedClassroom === "function")
-          onJoinedClassroom(body.classroom);
-        // After showing success, go to dashboard
-        setTimeout(() => typeof setMainView === "function" && setMainView("dashboard"), 1050);
-      }
-    } catch (err) {
-      setJoinError("Network error – could not reach backend.");
+    const classroom = classroomsRef.find(c => c.code === code);
+    if (!classroom) {
+      setJoinError("Classroom not found. Check your code and try again.");
+      setJoinLoading(false);
+      return;
     }
+    if (classroom.currentMembers >= classroom.maxMembers) {
+      setJoinError("This classroom is full! Maximum members reached.");
+      setJoinLoading(false);
+      return;
+    }
+    classroom.currentMembers += 1;
+    setJoinError("");
+    setJoinSuccessInfo({
+      code: classroom.code,
+      members: classroom.maxMembers,
+      currentMembers: classroom.currentMembers
+    });
+    addClassroomToStorage(
+      { code: classroom.code, members: classroom.maxMembers }, setMyClassrooms
+    );
+    if (typeof onJoinedClassroom === "function")
+      onJoinedClassroom({ code: classroom.code, members: classroom.maxMembers });
+    setTimeout(() => typeof setMainView === "function" && setMainView("dashboard"), 1050);
     setJoinLoading(false);
     setJoinCodeInput("");
   };
 
-/**
- * PUBLIC_INTERFACE (Create)
- * Enhanced error handling: Surface detailed error message to user.
- */
-const handleCreateSubmit = async (e) => {
-  e.preventDefault();
-  setSubmitting(true);
-  setCreateError("");
-  setJoinError("");
-  setJoinSuccessInfo(null);
+  // PUBLIC_INTERFACE (Create, frontend stub)
+  const handleCreateSubmit = (e) => {
+    e.preventDefault();
+    setSubmitting(true);
+    setCreateError("");
+    setJoinError("");
+    setJoinSuccessInfo(null);
 
-  // Validate member count
-  const count = parseInt(membersInput, 10);
-  if (isNaN(count) || count < 1) {
-    setSubmitting(false);
-    setMembersTouched(true);
-    setCreateError("Invalid members count.");
-    return;
-  }
+    const count = parseInt(membersInput, 10);
+    if (isNaN(count) || count < 1 || count > 200) {
+      setSubmitting(false);
+      setMembersTouched(true);
+      setCreateError("Invalid members count. Enter a value between 1 and 200.");
+      return;
+    }
 
-  // Generate classroom code
-  const code = generateClassroomCode();
+    // Generate unique classroom code (regenerate if duplicate)
+    let code = "";
+    let attempts = 0;
+    do {
+      code = generateClassroomCode();
+      attempts++;
+      if (attempts > 50) {
+        setCreateError("Unable to generate unique classroom code. Please try again.");
+        setSubmitting(false);
+        return;
+      }
+    } while (classroomsRef.find(c => c.code === code));
 
-  try {
-    // Always use absolute backend URL in fetch, not a relative path (fixes proxy mismatch)
-    const res = await fetch(
-      `${BACKEND_URL.replace(/\/+$/, "")}/classrooms`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ code, members: count })
+    // Double-check uniqueness
+    if (classroomsRef.find(c => c.code === code)) {
+      setCreateError("Classroom code already exists. Try again.");
+      setSubmitting(false);
+      return;
+    }
+
+    classroomsRef.push({
+      code,
+      maxMembers: count,
+      currentMembers: 1 // Creator is first member
     });
 
-    let responseText = "";
-    let responseJson = {};
-    try {
-      responseText = await res.text();
-      responseJson = responseText ? JSON.parse(responseText) : {};
-    } catch (err) {
-      responseJson = {};
-    }
+    setNewClassroomCode(code);
+    setNewClassroomMembers(count);
+    setCreated(true);
 
-    if (res.status === 409) {
-      setCreateError(responseJson?.error || "Classroom code already exists. Try again.");
-      setSubmitting(false);
-      return;
-    }
+    addClassroomToStorage({ code, members: count }, setMyClassrooms);
 
-    if (res.status === 400) {
-      setCreateError(responseJson?.error || "Invalid classroom data.");
-      setSubmitting(false);
-      return;
-    }
-
-    if (!res.ok) {
-      // Try to surface meaningful backend/network errors.
-      setCreateError(
-        responseJson?.error ||
-        (responseText && typeof responseText === "string" ? responseText : "") ||
-        `Server responded with status ${res.status}${res.statusText ? " (" + res.statusText + ")" : ""}.`
-      );
-      setSubmitting(false);
-      return;
-    }
-
-    // Success: show confirmation
-    if (responseJson && responseJson.classroom) {
-      setNewClassroomCode(code);
-      setNewClassroomMembers(count);
-      setCreated(true);
-    } else {
-      setCreateError(
-        responseJson?.error ||
-        "Unknown server error – classroom not created."
-      );
-    }
-
-  } catch (err) {
-    // Network or JS error: show detailed error if available
-    setCreateError(
-      (err && (err.message || err.toString()))
-        ? `Network error: ${err.message || err.toString()}`
-        : "Network error – could not reach backend."
-    );
-  }
-
-  setSubmitting(false);
-};
-
+    setSubmitting(false);
+  };
 
   // "Create" success confirmation UI
   if (created && mode === "create") {
@@ -929,7 +888,7 @@ const handleCreateSubmit = async (e) => {
             >
               <span>
                 Joined classroom <b>{joinSuccessInfo.code}</b> with{" "}
-                {joinSuccessInfo.members} members!
+                {joinSuccessInfo.members} max members!
                 <br />
                 <span
                   style={{
@@ -938,7 +897,7 @@ const handleCreateSubmit = async (e) => {
                     fontSize: 15
                   }}
                 >
-                  Ready to participate.
+                  Ready to participate. ({joinSuccessInfo.currentMembers} currently in class.)
                 </span>
               </span>
             </div>
@@ -1095,7 +1054,6 @@ const stubCard = (color, icon, text) => (
   </div>
 );
 
-/* ---- Chat Tab Stub ---- */
 const ClassroomChatStub = () => (
   <div
     style={{
@@ -1128,7 +1086,6 @@ const ClassroomChatStub = () => (
           color: "#348080",
           fontSize: 15.2
         }}>
-          {/* Message list placeholder */}
           <div style={{ color: "#94a9a9" }}>
             <b>No messages yet!</b>
             <br />
@@ -1177,7 +1134,6 @@ const ClassroomChatStub = () => (
   </div>
 );
 
-/* ---- Bulletin Board Tab Stub ---- */
 const ClassroomBulletinStub = () => (
   <div style={{ width: "100%", margin: 0, padding: 0, display: "flex", flexDirection: "column", alignItems: "center" }}>
     {stubCard(
@@ -1274,7 +1230,6 @@ const ClassroomBulletinStub = () => (
   </div>
 );
 
-/* ---- Notebook Tab Stub (PDF) ---- */
 const ClassroomNotebookStub = () => (
   <div style={{ width: "100%", display: "flex", flexDirection: "column", alignItems: "center" }}>
     {stubCard(
@@ -1331,7 +1286,6 @@ const ClassroomNotebookStub = () => (
   </div>
 );
 
-/* ---- Services Tab: Group Projects & Calls (add placeholders) ---- */
 const ClassroomServicesStub = () => (
   <div style={{
       display: "flex",
@@ -1594,7 +1548,6 @@ export const ClassroomConnectMainContainer = () => {
 
   // ClassroomView: now gets classroom prop and return handler
   const ClassroomViewContainer = ({ classroom }) => {
-    // Find currentMembers/maxMembers from in-memory array if possible
     let stats = null;
     if (
       window._classroomConnectInMemoryClassrooms &&

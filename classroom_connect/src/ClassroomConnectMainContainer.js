@@ -16,42 +16,136 @@ const colorPalette = {
 
 const fontStack = `'Nunito', 'Quicksand', 'Inter', 'Roboto', 'Helvetica Neue', Arial, sans-serif`;
 
-// Dashboard stub - will eventually list joined classrooms
+/**
+ * Dashboard: Playful, friendly, student card overview with hoverable "Add" card.
+ */
 const Dashboard = () => (
-  <section style={{ textAlign: "center", marginTop: 48 }}>
-    <h2 style={{ color: colorPalette.primary, marginBottom: 16 }}>Dashboard</h2>
-    <p style={{ color: colorPalette.text }}>See your joined Classrooms here.</p>
-    <div style={{
-      margin: "2rem auto", display: "flex", gap: "1.5rem", justifyContent: "center",
-      flexWrap: "wrap"
+  <section
+    style={{
+      textAlign: "center",
+      marginTop: 60,
+      fontFamily: fontStack,
+      background: "transparent"
+    }}
+  >
+    <h2 style={{
+      color: colorPalette.primary,
+      marginBottom: 8,
+      fontWeight: 900,
+      fontFamily: fontStack,
+      fontSize: "2.1rem",
+      letterSpacing: 1
     }}>
-      <div style={{
-        background: colorPalette.secondary,
-        borderRadius: 16,
-        width: 180,
-        height: 110,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        boxShadow: "0 2px 8px #e5e5e5",
-        fontWeight: "bold",
-        color: colorPalette.primary,
-      }}>
-        Classroom Card (stub)
+      Your Classrooms
+    </h2>
+    <p style={{
+      color: colorPalette.text,
+      fontWeight: 500,
+      marginBottom: 25,
+      letterSpacing: 0.15,
+      fontSize: 17
+    }}>Check your joined classrooms or add a new one!</p>
+    <div style={{
+      margin: "2.4rem auto 1.6rem",
+      display: "flex",
+      gap: "2.2rem",
+      justifyContent: "center",
+      flexWrap: "wrap",
+      background: "transparent"
+    }}>
+      {/* Example of a joined classroom (stubbed) */}
+      <div
+        style={{
+          background: colorPalette.card,
+          borderRadius: 20,
+          width: 200,
+          height: 128,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          boxShadow: colorPalette.shadow,
+          fontWeight: 700,
+          color: colorPalette.primary,
+          fontFamily: fontStack,
+          transition: "transform 0.14s, box-shadow 0.15s",
+          cursor: "pointer",
+          fontSize: "1.15rem",
+          position: "relative"
+        }}
+        tabIndex={0}
+        onMouseOver={e => {
+          e.currentTarget.style.transform = "scale(1.04)";
+          e.currentTarget.style.boxShadow = "0 8px 32px 0 #ffe8bb";
+        }}
+        onMouseOut={e => {
+          e.currentTarget.style.transform = "";
+          e.currentTarget.style.boxShadow = colorPalette.shadow;
+        }}
+        onFocus={e => {
+          e.currentTarget.style.transform = "scale(1.04)";
+          e.currentTarget.style.boxShadow = "0 8px 32px 0 #ffe8bb";
+        }}
+        onBlur={e => {
+          e.currentTarget.style.transform = "";
+          e.currentTarget.style.boxShadow = colorPalette.shadow;
+        }}
+        aria-label="Classroom Example Card"
+      >
+        <span role="img" aria-label="green notebook" style={{ fontSize: "1.6em", marginRight: 10 }}>📗</span>
+        Sample Classroom
       </div>
-      <div style={{
-        background: colorPalette.accent,
-        borderRadius: 16,
-        width: 180,
-        height: 110,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        fontWeight: "bold",
-        color: "#fff",
-        boxShadow: "0 2px 8px #e5e5e5",
-      }}>
-        Add Classroom +
+      {/* Add Classroom Card */}
+      <div
+        style={{
+          background: colorPalette.accent,
+          borderRadius: 20,
+          width: 200,
+          height: 128,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontWeight: 700,
+          color: "#fff",
+          fontFamily: fontStack,
+          fontSize: "1.12rem",
+          boxShadow: colorPalette.shadow,
+          cursor: "pointer",
+          transition: "transform 0.14s, box-shadow 0.15s, background 0.13s",
+          outline: "none",
+          position: "relative"
+        }}
+        tabIndex={0}
+        aria-label="Add Classroom"
+        onMouseOver={e => {
+          e.currentTarget.style.transform = "scale(1.06)";
+          e.currentTarget.style.background = "#fa4b6a";
+        }}
+        onMouseOut={e => {
+          e.currentTarget.style.transform = "";
+          e.currentTarget.style.background = colorPalette.accent;
+        }}
+        onFocus={e => {
+          e.currentTarget.style.transform = "scale(1.06)";
+          e.currentTarget.style.background = "#fa4b6a";
+        }}
+        onBlur={e => {
+          e.currentTarget.style.transform = "";
+          e.currentTarget.style.background = colorPalette.accent;
+        }}
+      >
+        <span
+          style={{
+            marginRight: 13,
+            fontSize: "1.6em",
+            display: "inline-block",
+            filter: "drop-shadow(0 2px 5px #ffd7e1)"
+          }}
+          role="img"
+          aria-label="add"
+        >
+          ➕
+        </span>
+        Add Classroom
       </div>
     </div>
   </section>

@@ -458,57 +458,94 @@ const ClassroomJoinCreateForm = ({
     setJoinCodeInput("");
   };
 
-  // PUBLIC_INTERFACE (Create)
-  const handleCreateSubmit = async (e) => {
-    e.preventDefault();
-    setSubmitting(true);
-    setCreateError("");
-    setJoinError("");
-    setJoinSuccessInfo(null);
+/**
+ * PUBLIC_INTERFACE (Create)
+ * Enhanced error handling: Surface detailed error message to user.
+ */
+const handleCreateSubmit = async (e) => {
+  e.preventDefault();
+  setSubmitting(true);
+  setCreateError("");
+  setJoinError("");
+  setJoinSuccessInfo(null);
 
-    // Validate member count
-    const count = parseInt(membersInput, 10);
-    if (isNaN(count) || count < 1) {
+  // Validate member count
+  const count = parseInt(membersInput, 10);
+  if (isNaN(count) || count < 1) {
+    setSubmitting(false);
+    setMembersTouched(true);
+    setCreateError("Invalid members count.");
+    return;
+  }
+
+  // Generate classroom code
+  const code = generateClassroomCode();
+
+  try {
+    // Always use absolute backend URL in fetch, not a relative path (fixes proxy mismatch)
+    const res = await fetch(
+      `${BACKEND_URL.replace(/\/+$/, "")}/classrooms`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ code, members: count })
+    });
+
+    let responseText = "";
+    let responseJson = {};
+    try {
+      responseText = await res.text();
+      responseJson = responseText ? JSON.parse(responseText) : {};
+    } catch (err) {
+      responseJson = {};
+    }
+
+    if (res.status === 409) {
+      setCreateError(responseJson?.error || "Classroom code already exists. Try again.");
       setSubmitting(false);
-      setMembersTouched(true);
-      setCreateError("Invalid members count.");
       return;
     }
-    // Generate classroom code
-    const code = generateClassroomCode();
 
-    // POST to backend
-    try {
-      const res = await fetch(`${BACKEND_URL}/classrooms`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code, members: count })
-      });
-      if (res.status === 409) {
-        setCreateError("Classroom code already exists. Try again.");
-        setSubmitting(false);
-        return;
-      }
-      if (res.status === 400) {
-        const data = await res.json().catch(() => ({}));
-        setCreateError(data?.error || "Invalid classroom data.");
-        setSubmitting(false);
-        return;
-      }
-      if (!res.ok) {
-        setCreateError("Unknown error – failed to create classroom.");
-        setSubmitting(false);
-        return;
-      }
-      // Success: show confirmation
+    if (res.status === 400) {
+      setCreateError(responseJson?.error || "Invalid classroom data.");
+      setSubmitting(false);
+      return;
+    }
+
+    if (!res.ok) {
+      // Try to surface meaningful backend/network errors.
+      setCreateError(
+        responseJson?.error ||
+        (responseText && typeof responseText === "string" ? responseText : "") ||
+        `Server responded with status ${res.status}${res.statusText ? " (" + res.statusText + ")" : ""}.`
+      );
+      setSubmitting(false);
+      return;
+    }
+
+    // Success: show confirmation
+    if (responseJson && responseJson.classroom) {
       setNewClassroomCode(code);
       setNewClassroomMembers(count);
       setCreated(true);
-    } catch (err) {
-      setCreateError("Network error – could not reach backend.");
+    } else {
+      setCreateError(
+        responseJson?.error ||
+        "Unknown server error – classroom not created."
+      );
     }
-    setSubmitting(false);
-  };
+
+  } catch (err) {
+    // Network or JS error: show detailed error if available
+    setCreateError(
+      (err && (err.message || err.toString()))
+        ? `Network error: ${err.message || err.toString()}`
+        : "Network error – could not reach backend."
+    );
+  }
+
+  setSubmitting(false);
+};
+
 
   // "Create" success confirmation UI
   if (created && mode === "create") {

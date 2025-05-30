@@ -10,6 +10,7 @@ const colorPalette = {
   nav: "#F6F7FA",
 };
 
+// Dashboard stub - will eventually list joined classrooms
 const Dashboard = () => (
   <section style={{ textAlign: "center", marginTop: 48 }}>
     <h2 style={{ color: colorPalette.primary, marginBottom: 16 }}>Dashboard</h2>
@@ -50,6 +51,7 @@ const Dashboard = () => (
   </section>
 );
 
+// Classroom joining/creation form stub
 const ClassroomJoinCreateForm = () => (
   <section style={{
     margin: "3rem auto",
@@ -100,6 +102,8 @@ const ClassroomJoinCreateForm = () => (
   </section>
 );
 
+// Feature stub components
+
 const ChatFeatureStub = () => (
   <div style={{
     textAlign: "center",
@@ -142,6 +146,7 @@ const AudioVideoCallsStub = () => (
   </div>
 );
 
+// ClassroomView: Tabs for feature stubs
 const ClassroomView = () => {
   const [tab, setTab] = useState("chat");
 

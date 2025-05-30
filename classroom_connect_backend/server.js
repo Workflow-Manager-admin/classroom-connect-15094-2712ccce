@@ -18,38 +18,17 @@ const PORT = process.env.PORT || 4555;
  */
 const classrooms = {};
 
+// Helper: Normalize classroom code to uppercase
+function normalizeCode(code) {
+  return typeof code === 'string' ? code.toUpperCase() : '';
+}
+
 app.use(cors());
 app.use(express.json());
 
-/* ===========================================================================
- * API ENDPOINTS for CLASSROOM CONNECT BACKEND
- * ===========================================================================
- *
- * This backend is intended for lightweight classroom creation and code verification.
- * It is stateful only in memory (data will be lost if restarted). No auth required.
- * 
- * All responses are JSON. All endpoints support CORS.
- *
- * ┌─────────────────────────────────────────────┐
- * │    POST /classrooms                        │
- * └─────────────────────────────────────────────┘
- *   ● Create a new classroom code with member limit
- *   ● Body:   { code: "ABC123", members: 25 }
- *   ● Success: { success: true, classroom: { code, members, createdAt } }
- *   ● Failure: 400 (bad code/params) | 409 (already exists)
- * 
- * ┌─────────────────────────────────────────────┐
- * │    GET /classrooms/:code                   │
- * └─────────────────────────────────────────────┘
- *   ● Check if a classroom code exists
- *   ● Response:  { classroom: { code, members, createdAt } }
- *   ● 404 if not found, 400 if malformed code
- *
- * ┌─────────────────────────────────────────────┐
- * │    GET /                                   │
- * └─────────────────────────────────────────────┘
- *   ● Health check endpoint. Returns { status: "ok", ... }
- */
+// ===========================================================================
+// API ENDPOINTS for CLASSROOM CONNECT BACKEND
+// ===========================================================================
 
 /**
  * PUBLIC_INTERFACE
@@ -65,7 +44,10 @@ app.use(express.json());
  *   - 409: code already exists
  */
 app.post('/classrooms', (req, res) => {
-  const { code, members } = req.body;
+  let { code, members } = req.body;
+  code = normalizeCode(code);
+
+  // Validate code
   if (
     typeof code !== 'string' ||
     code.length !== 6 ||
@@ -73,17 +55,23 @@ app.post('/classrooms', (req, res) => {
   ) {
     return res.status(400).json({ error: 'Invalid classroom code. Must be 6 uppercase letters/digits.' });
   }
+
+  // Validate members
   if (
     typeof members !== 'number' ||
-    !Number.isFinite(members) ||
+    !Number.isInteger(members) ||
     members < 1 ||
     members > 200
   ) {
-    return res.status(400).json({ error: 'Invalid members count (1-200 required).' });
+    return res.status(400).json({ error: 'Invalid members count (1-200, integer, required).' });
   }
+
+  // Classroom code uniqueness
   if (classrooms[code]) {
     return res.status(409).json({ error: 'Classroom code already exists.' });
   }
+
+  // Create classroom in store
   classrooms[code] = {
     code,
     members,
@@ -103,7 +91,8 @@ app.post('/classrooms', (req, res) => {
  *    - 400: if code format invalid
  */
 app.get('/classrooms/:code', (req, res) => {
-  const { code } = req.params;
+  let code = normalizeCode(req.params.code);
+
   if (
     typeof code !== 'string' ||
     code.length !== 6 ||
@@ -127,6 +116,11 @@ app.get('/classrooms/:code', (req, res) => {
  */
 app.get('/', (req, res) => {
   res.json({ status: 'ok', msg: 'Classroom Connect backend running.' });
+});
+
+// Fallback for unsupported routes
+app.use((req, res) => {
+  res.status(404).json({ error: 'Endpoint not found.' });
 });
 
 app.listen(PORT, () => {

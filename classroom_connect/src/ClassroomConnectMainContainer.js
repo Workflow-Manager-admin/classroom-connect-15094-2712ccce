@@ -19,27 +19,47 @@ const fontStack = `'Nunito', 'Quicksand', 'Inter', 'Roboto', 'Helvetica Neue', A
 /**
  * Dashboard: Lists classrooms joined from local/session storage, or prompts to join; integrated with playful UI.
  */
-const Dashboard = ({ onGoToJoinCreate }) => {
-  const [myClassrooms, setMyClassrooms] = React.useState([]);
-  React.useEffect(() => {
-    // Prefer localStorage, fallback to sessionStorage
-    let classesRaw = (typeof window !== "undefined") && (window.localStorage?.getItem("classroomconnect_myclassrooms") ||
-      window.sessionStorage?.getItem("classroomconnect_myclassrooms"));
-    let list = [];
-    try {
-      // Support legacy format: comma string or JSON array of {code, members}
-      if (classesRaw) {
-        if (classesRaw.trim().startsWith("[")) {
-          list = JSON.parse(classesRaw);
-        } else {
-          // Comma-separated codes
-          list = classesRaw.split(",").map(s => ({ code: s.trim(), members: null }));
-        }
+/**
+ * Read ALL classrooms for this user from browser storage.
+ * This helper can be reused to sync across UI.
+ * Always returns an array.
+ */
+function getAllMyClassroomsFromStorage() {
+  let classesRaw = (typeof window !== "undefined") &&
+    (window.localStorage?.getItem("classroomconnect_myclassrooms") ||
+     window.sessionStorage?.getItem("classroomconnect_myclassrooms"));
+  let list = [];
+  try {
+    // Support legacy format: comma string or JSON array of {code, members}
+    if (classesRaw) {
+      if (classesRaw.trim().startsWith("[")) {
+        list = JSON.parse(classesRaw);
+      } else {
+        // Comma-separated codes
+        list = classesRaw.split(",").map(s => ({ code: s.trim(), members: null }));
       }
-    } catch {
-      list = [];
     }
-    setMyClassrooms(Array.isArray(list) ? list : []);
+  } catch {
+    list = [];
+  }
+  return Array.isArray(list) ? list : [];
+}
+
+/**
+ * Dashboard: Lists all classrooms, OR lets user join if none.
+ * Accepts onGoToJoinCreate prop for "add classroom" action,
+ * and can easily accept instant updates with setClassrooms in future.
+ */
+const Dashboard = ({ onGoToJoinCreate }) => {
+  const [myClassrooms, setMyClassrooms] = React.useState(getAllMyClassroomsFromStorage());
+  // In the future: pass setMyClassrooms via context or handle updates in parent for real-time updates
+
+  // Re-sync from storage on dashboard mount (and when tab regains focus)
+  React.useEffect(() => {
+    const refresh = () => setMyClassrooms(getAllMyClassroomsFromStorage());
+    window.addEventListener("focus", refresh);
+    refresh(); // load now as well
+    return () => window.removeEventListener("focus", refresh);
   }, []);
 
   // Add Classroom event handler
@@ -132,7 +152,7 @@ const Dashboard = ({ onGoToJoinCreate }) => {
               </span>
             </div>
           ))}
-          {/* Add more classroom button card */}
+          {/* Always show a clear way to join/add a classroom */}
           <div
             style={{
               background: colorPalette.accent,

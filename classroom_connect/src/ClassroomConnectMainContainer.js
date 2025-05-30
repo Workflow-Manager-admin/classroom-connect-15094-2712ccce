@@ -518,9 +518,11 @@ const ClassroomJoinCreateForm = () => {
               color: colorPalette.text,
               boxShadow: "0 1.5px 6px #f6f6f7"
             }}
+            disabled={joinLoading}
           />
           <button
             type="submit"
+            disabled={joinLoading}
             style={{
               width: "100%",
               background: colorPalette.primary,
@@ -530,16 +532,44 @@ const ClassroomJoinCreateForm = () => {
               padding: "11px 0",
               border: "none",
               outline: "none",
-              cursor: "pointer",
+              cursor: joinLoading ? "wait" : "pointer",
               fontSize: 17,
               fontFamily: fontStack,
-              transition: "background 0.12s, box-shadow 0.13s"
+              transition: "background 0.12s, box-shadow 0.13s",
+              opacity: joinLoading ? 0.6 : 1
             }}
-            onMouseOver={e => { e.currentTarget.style.background = "#337e7d"; }}
-            onMouseOut={e => { e.currentTarget.style.background = colorPalette.primary; }}
-            onFocus={e => { e.currentTarget.style.background = "#337e7d"; }}
-            onBlur={e => { e.currentTarget.style.background = colorPalette.primary; }}
-          >Join</button>
+            onMouseOver={e => { if (!joinLoading) e.currentTarget.style.background = "#337e7d"; }}
+            onMouseOut={e => { if (!joinLoading) e.currentTarget.style.background = colorPalette.primary; }}
+            onFocus={e => { if (!joinLoading) e.currentTarget.style.background = "#337e7d"; }}
+            onBlur={e => { if (!joinLoading) e.currentTarget.style.background = colorPalette.primary; }}
+          >{joinLoading ? "Checking..." : "Join"}</button>
+
+          {joinError && (
+            <div style={{
+              marginTop: 10,
+              color: colorPalette.accent,
+              fontWeight: 700,
+              padding: "8px 0 0 0",
+              minHeight: 24
+            }}>
+              {joinError}
+            </div>
+          )}
+          {joinSuccessInfo && (
+            <div style={{
+              marginTop: 14,
+              color: colorPalette.primary,
+              fontWeight: 700,
+              background: "#f3fff0",
+              border: `1px solid ${colorPalette.primary}`,
+              borderRadius: 9,
+              padding: "10px 8px"
+            }}>
+              <span>Joined classroom <b>{joinSuccessInfo.code}</b> with {joinSuccessInfo.members} members!
+                <br /><span style={{ fontWeight: 500, color: colorPalette.text, fontSize: 15 }}>Ready to participate.</span>
+              </span>
+            </div>
+          )}
         </form>
       ) : (
         <form
